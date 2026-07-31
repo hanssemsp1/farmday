@@ -19,6 +19,7 @@ import PointsPage from './pages/PointsPage'
 import CheckoutSuccessPage from './pages/CheckoutSuccessPage'
 import CheckoutFailPage from './pages/CheckoutFailPage'
 import NotificationsPage from './pages/NotificationsPage'
+import AdminProductsPage from './pages/AdminProductsPage'
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
           <Route path="/checkout/fail" element={<CheckoutFailPage />} />
+          <Route path="/admin/products" element={<AdminProductsPage />} />
         </Routes>
       </main>
       <Footer />

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ProductGrid from '../components/product/ProductGrid'
 import Icon from '../components/ui/Icon'
-import { dummyProducts } from '../data/dummyProducts'
+import { useProducts } from '../context/ProductsContext'
 import './BestProductsPage.css'
 
 const SORT_OPTIONS = [
@@ -15,6 +15,7 @@ const SORT_OPTIONS = [
 type SortValue = (typeof SORT_OPTIONS)[number]['value']
 
 export default function BestProductsPage() {
+  const { products: allProducts } = useProducts()
   const [searchParams, setSearchParams] = useSearchParams()
   const [sort, setSort] = useState<SortValue>('popular')
   const [keyword, setKeyword] = useState(() => searchParams.get('q') ?? '')
@@ -27,7 +28,7 @@ export default function BestProductsPage() {
   }, [searchParams])
 
   const products = useMemo(() => {
-    let list = dummyProducts.filter((p) => {
+    let list = allProducts.filter((p) => {
       const matchesKeyword = keyword.trim()
         ? p.name.includes(keyword.trim()) || p.brand.includes(keyword.trim())
         : true
@@ -39,7 +40,7 @@ export default function BestProductsPage() {
     if (sort === 'price-desc') list.sort((a, b) => b.price - a.price)
     if (sort === 'new') list.sort((a, b) => (b.badges?.includes('new') ? 1 : 0) - (a.badges?.includes('new') ? 1 : 0))
     return list
-  }, [sort, keyword, category])
+  }, [sort, keyword, category, allProducts])
 
   function clearCategory() {
     const next = new URLSearchParams(searchParams)

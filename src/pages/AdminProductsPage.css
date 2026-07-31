@@ -1,0 +1,89 @@
+.admin-products { padding-top: 32px; padding-bottom: 64px; }
+
+.admin-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.admin-head h1 { font-size: 22px; margin: 0; }
+
+.admin-form {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  margin-bottom: 32px;
+}
+.admin-form h2 { font-size: 16px; margin: 0 0 16px; }
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.admin-field { display: flex; flex-direction: column; gap: 6px; }
+.admin-field label { font-size: 13px; font-weight: 600; }
+.admin-field input,
+.admin-field select {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 10px 12px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+}
+.admin-field-checkbox { flex-direction: row; align-items: center; }
+.admin-field-checkbox label { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+
+.thumb-picker { display: flex; gap: 8px; }
+.thumb-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+.thumb-swatch.active { border-color: var(--text); }
+
+.admin-notice {
+  margin-top: 16px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.admin-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-top: 2px solid var(--text);
+}
+.admin-table th {
+  text-align: left;
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.admin-table td {
+  padding: 12px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.admin-thumb { width: 40px; height: 40px; border-radius: var(--radius-card); }
+
+.admin-row-actions { display: flex; gap: 8px; white-space: nowrap; }
+
+@media (max-width: 640px) {
+  .admin-form-grid { grid-template-columns: 1fr; }
+}

@@ -4,6 +4,7 @@ import Icon from '../ui/Icon'
 import Button from '../ui/Button'
 import { useAuth } from '../../context/AuthContext'
 import { useCart } from '../../context/CartContext'
+import { isAdmin } from '../../lib/adminConfig'
 import './Header.css'
 
 export default function Header() {
@@ -54,6 +55,11 @@ export default function Header() {
           <Link to="/mypage" className="icon-btn icon-btn-user" aria-label="마이페이지">
             <Icon name="user" />
           </Link>
+          {isAdmin(user) && (
+            <Link to="/admin/products" className="btn btn-sm btn-outline">
+              상품 관리
+            </Link>
+          )}
           {user ? (
             <button className="btn btn-sm btn-outline" onClick={handleSignOut}>
               로그아웃

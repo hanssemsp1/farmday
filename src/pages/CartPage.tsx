@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Icon from '../components/ui/Icon'
 import Button from '../components/ui/Button'
-import { dummyProducts } from '../data/dummyProducts'
+import { useProducts } from '../context/ProductsContext'
 import { useAuth } from '../context/AuthContext'
 import { useCart, CartLine } from '../context/CartContext'
 import { createOrder } from '../lib/orders'
@@ -14,6 +14,7 @@ const SHIPPING_FEE = 3000
 
 export default function CartPage() {
   const { lines, toggleAll, toggleLine, updateQuantity, removeLine, removeSelected, removeLines } = useCart()
+  const { products, loading: productsLoading } = useProducts()
   const [notice, setNotice] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const { user } = useAuth()
@@ -22,9 +23,9 @@ export default function CartPage() {
   const items = useMemo(
     () =>
       lines
-        .map((line) => ({ line, product: dummyProducts.find((p) => p.id === line.productId) }))
-        .filter((x): x is { line: CartLine; product: (typeof dummyProducts)[number] } => !!x.product),
-    [lines],
+        .map((line) => ({ line, product: products.find((p) => p.id === line.productId) }))
+        .filter((x): x is { line: CartLine; product: (typeof products)[number] } => !!x.product),
+    [lines, products],
   )
 
   const allSelected = items.length > 0 && items.every((i) => i.line.selected)
@@ -72,6 +73,8 @@ export default function CartPage() {
       )
     }
   }
+
+  if (productsLoading) return null
 
   if (items.length === 0 && !submitting && !notice) {
     return (
