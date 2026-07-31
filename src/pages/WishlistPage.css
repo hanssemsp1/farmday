@@ -1,0 +1,12 @@
+.wishlist-page { padding-top: 32px; padding-bottom: 64px; }
+.wishlist-title { font-size: 22px; margin: 0 0 24px; }
+
+.wishlist-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 80px 0;
+  color: var(--text-muted);
+}
+.wishlist-empty-icon { color: var(--border); width: 56px; height: 56px; }

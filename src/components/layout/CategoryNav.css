@@ -1,0 +1,32 @@
+.category-nav {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.category-nav-inner {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.category-nav-inner::-webkit-scrollbar { display: none; }
+
+.category-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.category-icon { color: inherit; }
+
+.category-link:hover { color: var(--text); }
+.category-link.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}

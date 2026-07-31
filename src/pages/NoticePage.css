@@ -1,0 +1,20 @@
+.notice-page { padding-top: 32px; padding-bottom: 64px; max-width: 760px; }
+.notice-page h1 { font-size: 22px; margin: 0 0 24px; }
+
+.notice-list {
+  border-top: 2px solid var(--text);
+}
+
+.notice-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 4px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.notice-row:hover { color: var(--primary); }
+
+.notice-title { font-size: 14px; font-weight: 500; }
+.notice-date { font-size: 13px; color: var(--text-muted); flex-shrink: 0; }

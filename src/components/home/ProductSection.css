@@ -1,0 +1,24 @@
+.product-section { padding-top: 48px; }
+
+.product-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.product-section-head h2 { font-size: 20px; margin: 0; }
+.product-section-subtitle { font-size: 13px; color: var(--text-muted); margin: 4px 0 0; }
+
+.more-link {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.more-link:hover { color: var(--primary); }
+
+@media (max-width: 768px) {
+  .product-section { padding-top: 36px; }
+}

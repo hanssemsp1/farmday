@@ -1,0 +1,90 @@
+.board-page { padding-top: 32px; padding-bottom: 64px; }
+
+.board-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.board-head h1 { font-size: 22px; margin: 0; }
+
+.board-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 10px 16px;
+  max-width: 320px;
+  margin-bottom: 20px;
+  color: var(--text-muted);
+}
+.board-search input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  width: 100%;
+  color: var(--text);
+}
+
+.board-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-top: 2px solid var(--text);
+}
+.board-table th {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.board-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.col-category, .col-author, .col-date, .col-views { text-align: center; white-space: nowrap; }
+.col-title { width: 100%; }
+
+.board-title-link:hover { color: var(--primary); }
+
+.board-empty {
+  text-align: center;
+  padding: 60px 0;
+  color: var(--text-muted);
+}
+
+.board-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-top: 24px;
+}
+.board-pagination button {
+  min-width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.board-pagination button:hover:not(:disabled) { background: var(--surface); }
+.board-pagination button.active { background: var(--primary); color: #fff; }
+.board-pagination button:disabled { opacity: .3; cursor: not-allowed; }
+.rotate-180 { transform: rotate(180deg); }
+
+@media (max-width: 640px) {
+  .col-author, .col-date { display: none; }
+}

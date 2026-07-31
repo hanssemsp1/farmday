@@ -1,0 +1,56 @@
+.coupon-page { padding-top: 32px; padding-bottom: 64px; max-width: 640px; }
+.coupon-page h1 { font-size: 22px; margin: 0 0 24px; }
+
+.coupon-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.coupon-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 1.5px solid var(--primary);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  position: relative;
+}
+.coupon-card.is-inactive {
+  border-color: var(--border);
+  opacity: .55;
+}
+
+.coupon-discount {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 96px;
+}
+.is-inactive .coupon-discount { color: var(--text-muted); }
+
+.coupon-info { flex: 1; }
+.coupon-title { font-size: 14px; font-weight: 600; margin: 0 0 4px; }
+.coupon-condition { font-size: 12px; color: var(--text-muted); margin: 0 0 2px; }
+.coupon-expiry { font-size: 12px; color: var(--text-muted); margin: 0; }
+
+.coupon-status {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text-muted);
+}
+.coupon-status.active {
+  background: rgba(46, 182, 125, 0.12);
+  color: #1c7a53;
+}
+
+@media (max-width: 480px) {
+  .coupon-card { flex-wrap: wrap; gap: 8px 20px; }
+  .coupon-status { margin-left: auto; }
+}

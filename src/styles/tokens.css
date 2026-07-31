@@ -1,0 +1,94 @@
+/* ============================================================
+   Farmday 디자인 시스템 토큰
+   색 조합: 슬랙 · 컬러풀 / 버튼: 둥근 알약 / 폰트: Poppins / 아이콘: 솔리드
+   ============================================================ */
+
+/* 폰트: Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+  /* 색 조합: 슬랙 · 컬러풀 */
+  --primary: #4A154B;
+  --accent: #1264A3;
+  --green: #2EB67D;
+  --yellow: #ECB22E;
+  --text: #1D1C1D;
+  --bg: #FFFFFF;
+  --border: #E8E8E8;
+
+  /* 파생 토큰 (전역 레이아웃에서 반복 사용) */
+  --text-muted: #6B6669;
+  --surface: #FAFAFA;
+  --danger: #E01E5A;
+  --radius-pill: 999px;
+  --radius-card: 12px;
+  --shadow-card: 0 1px 3px rgba(29, 28, 29, 0.08);
+  --shadow-card-hover: 0 6px 16px rgba(29, 28, 29, 0.12);
+  --header-height: 72px;
+}
+
+/* 버튼 모양: 둥근 알약 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: var(--radius-pill);
+  padding: 12px 22px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: .15s;
+  white-space: nowrap;
+}
+.btn:hover { filter: brightness(.95); }
+.btn:active { filter: brightness(.9); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.btn-accent { background: var(--accent); }
+.btn-green { background: var(--green); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+}
+.btn-outline:hover { background: rgba(74, 21, 75, 0.06); filter: none; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border: none;
+  padding: 8px 14px;
+}
+.btn-ghost:hover { background: var(--surface); filter: none; }
+
+.btn-sm { padding: 8px 16px; font-size: 13px; }
+.btn-lg { padding: 15px 28px; font-size: 16px; }
+
+/* 폰트: Poppins */
+body {
+  font-family: 'Poppins', sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+h1, h2, h3 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+h4, h5, h6 { font-weight: 600; }
+
+/* 아이콘: 솔리드 (채움) */
+.icon {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  stroke: none;
+  flex-shrink: 0;
+}
+.icon-sm { width: 18px; height: 18px; }
+.icon-lg { width: 32px; height: 32px; }

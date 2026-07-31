@@ -1,0 +1,37 @@
+.checkout-result {
+  max-width: 480px;
+  padding: 80px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.checkout-result h1 { font-size: 20px; margin: 0 0 12px; }
+
+.checkout-result-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 28px;
+}
+.checkout-result-icon.success { background: rgba(46, 182, 125, 0.12); color: #1c7a53; }
+.checkout-result-icon.fail { background: rgba(224, 30, 90, 0.1); color: var(--danger); }
+
+.checkout-result-amount { font-size: 24px; font-weight: 700; margin: 0 0 16px; }
+
+.checkout-result-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+.checkout-result-actions {
+  display: flex;
+  gap: 10px;
+}
