@@ -10,7 +10,7 @@ export default function Footer() {
       <div className="container footer-inner">
         <div className="footer-top">
           <div className="footer-brand">
-            <span className="logo">Farmday<span className="logo-dot">.</span></span>
+            <Link to="/" className="logo">Farmday<span className="logo-dot">.</span></Link>
             <p>매일이 수확하는 날, 산지직송 신선식품 마켓</p>
           </div>
           <div className="footer-links">
