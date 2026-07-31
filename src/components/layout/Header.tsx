@@ -4,6 +4,7 @@ import Icon from '../ui/Icon'
 import Button from '../ui/Button'
 import { useAuth } from '../../context/AuthContext'
 import { useCart } from '../../context/CartContext'
+import { useFavorites } from '../../context/FavoritesContext'
 import { isAdmin } from '../../lib/adminConfig'
 import './Header.css'
 
@@ -12,6 +13,7 @@ export default function Header() {
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
   const { itemCount } = useCart()
+  const { favoriteIds } = useFavorites()
 
   function handleSearch(e: FormEvent) {
     e.preventDefault()
@@ -47,6 +49,10 @@ export default function Header() {
           <Link to="/notice" className="icon-btn" aria-label="공지사항">
             <Icon name="bell" />
             <span className="icon-dot" />
+          </Link>
+          <Link to="/wishlist" className="icon-btn" aria-label="찜한 상품">
+            <Icon name="heart" />
+            {favoriteIds.length > 0 && <span className="cart-count">{favoriteIds.length}</span>}
           </Link>
           <Link to="/cart" className="icon-btn" aria-label="장바구니">
             <Icon name="cart" />

@@ -76,12 +76,14 @@ export default function ProductCard({ product }: { product: Product }) {
           <span className="review-count">({product.reviewCount.toLocaleString()})</span>
         </div>
 
-        {!product.soldOut && (
-          <button className={`add-to-cart-btn ${added ? 'added' : ''}`} onClick={handleAddToCart}>
-            <Icon name="cart" className="icon-sm" />
-            {added ? '담았어요!' : '장바구니 담기'}
-          </button>
-        )}
+        <button
+          className={`add-to-cart-btn ${added ? 'added' : ''}`}
+          onClick={handleAddToCart}
+          disabled={product.soldOut}
+        >
+          <Icon name="cart" className="icon-sm" />
+          {product.soldOut ? '품절된 상품이에요' : added ? '담았어요!' : '장바구니 담기'}
+        </button>
       </div>
     </Link>
   )

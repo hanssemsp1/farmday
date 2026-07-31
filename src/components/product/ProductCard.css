@@ -125,3 +125,9 @@
   border-color: var(--green);
   color: #fff;
 }
+.add-to-cart-btn:disabled {
+  cursor: not-allowed;
+  color: var(--text-muted);
+  background: var(--surface);
+}
+.add-to-cart-btn:disabled:hover { background: var(--surface); }
