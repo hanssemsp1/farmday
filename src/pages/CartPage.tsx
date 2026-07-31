@@ -4,7 +4,7 @@ import Icon from '../components/ui/Icon'
 import Button from '../components/ui/Button'
 import { dummyProducts } from '../data/dummyProducts'
 import { useAuth } from '../context/AuthContext'
-import { useCart } from '../context/CartContext'
+import { useCart, CartLine } from '../context/CartContext'
 import { createOrder } from '../lib/orders'
 import { requestTossPayment } from '../lib/toss'
 import './CartPage.css'
@@ -23,7 +23,7 @@ export default function CartPage() {
     () =>
       lines
         .map((line) => ({ line, product: dummyProducts.find((p) => p.id === line.productId) }))
-        .filter((x): x is { line: typeof line; product: (typeof dummyProducts)[number] } => !!x.product),
+        .filter((x): x is { line: CartLine; product: (typeof dummyProducts)[number] } => !!x.product),
     [lines],
   )
 
