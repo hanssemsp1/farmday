@@ -26,7 +26,13 @@ const EMPTY_FORM = {
   discountRate: '',
   thumbnail: GRADIENTS[0],
   description: '',
+  detailImages: [] as string[],
   soldOut: false,
+}
+
+function extractUrl(thumbnail: string): string | null {
+  const match = thumbnail.match(/^url\("(.+)"\) center\/cover no-repeat$/)
+  return match ? match[1] : null
 }
 
 export default function AdminProductsPage() {
@@ -62,6 +68,7 @@ export default function AdminProductsPage() {
       discountRate: p.discountRate ? String(p.discountRate) : '',
       thumbnail: p.thumbnail,
       description: p.description ?? '',
+      detailImages: p.detailImages ?? [],
       soldOut: p.soldOut ?? false,
     })
     setNotice('')
@@ -71,18 +78,49 @@ export default function AdminProductsPage() {
     setEditingId(null)
   }
 
-  async function handleImageSelect(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+  async function handleBulkImageSelect(e: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    e.target.value = ''
+    if (files.length === 0) return
     setUploading(true)
     setNotice('')
-    const { url, error } = await uploadProductImage(file)
+    const results = await Promise.all(files.map(uploadProductImage))
     setUploading(false)
-    if (error || !url) {
-      setNotice(`이미지 업로드 중 오류가 발생했어요: ${error}`)
-      return
-    }
-    setForm((f) => ({ ...f, thumbnail: `url("${url}") center/cover no-repeat` }))
+
+    const urls = results.filter((r) => r.url).map((r) => r.url!) as string[]
+    const failedCount = results.filter((r) => r.error).length
+    if (failedCount > 0) setNotice(`${failedCount}개 이미지 업로드에 실패했어요.`)
+    if (urls.length === 0) return
+
+    setForm((f) => {
+      const currentMain = extractUrl(f.thumbnail)
+      if (!currentMain) {
+        const [first, ...rest] = urls
+        return { ...f, thumbnail: `url("${first}") center/cover no-repeat`, detailImages: [...f.detailImages, ...rest] }
+      }
+      return { ...f, detailImages: [...f.detailImages, ...urls] }
+    })
+  }
+
+  function setMainPhoto(url: string) {
+    setForm((f) => {
+      const currentMain = extractUrl(f.thumbnail)
+      const pool = new Set(f.detailImages)
+      if (currentMain) pool.add(currentMain)
+      pool.delete(url)
+      return { ...f, thumbnail: `url("${url}") center/cover no-repeat`, detailImages: Array.from(pool) }
+    })
+  }
+
+  function removePhoto(url: string) {
+    setForm((f) => {
+      const currentMain = extractUrl(f.thumbnail)
+      if (currentMain === url) {
+        const [next, ...rest] = f.detailImages
+        return { ...f, thumbnail: next ? `url("${next}") center/cover no-repeat` : GRADIENTS[0], detailImages: rest }
+      }
+      return { ...f, detailImages: f.detailImages.filter((u) => u !== url) }
+    })
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -105,6 +143,7 @@ export default function AdminProductsPage() {
       reviewCount: 0,
       thumbnail: form.thumbnail,
       description: form.description.trim() || undefined,
+      detailImages: form.detailImages,
       badges: [],
       soldOut: form.soldOut,
     }
@@ -158,12 +197,44 @@ export default function AdminProductsPage() {
                 ))}
               </select>
             </div>
-            <div className="admin-field">
-              <label>상품 사진</label>
-              <div className="thumb-preview" style={{ background: form.thumbnail }}>
-                {uploading && <span className="thumb-uploading">업로드 중...</span>}
+            <div className="admin-field admin-field-wide">
+              <label>상품 사진 (썸네일 후보 + 상세 이미지 한 번에 선택)</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleBulkImageSelect}
+                disabled={uploading}
+              />
+              <p className="admin-hint">
+                사진을 여러 장 한 번에 선택하세요. 아래에서 대표로 쓸 사진을 클릭하면 메인 썸네일로 지정되고,
+                나머지는 상세페이지 이미지로 자동 등록돼요.
+              </p>
+              {uploading && <span className="thumb-uploading">업로드 중...</span>}
+
+              <div className="photo-grid">
+                {(() => {
+                  const mainUrl = extractUrl(form.thumbnail)
+                  const photos = [...(mainUrl ? [mainUrl] : []), ...form.detailImages]
+                  return photos.map((url) => (
+                    <div key={url} className={`photo-item ${url === mainUrl ? 'is-main' : ''}`}>
+                      <button type="button" onClick={() => setMainPhoto(url)} className="photo-item-img">
+                        <img src={url} alt="상품 사진" />
+                        {url === mainUrl && <span className="photo-main-badge">대표</span>}
+                      </button>
+                      <button
+                        type="button"
+                        className="photo-remove-btn"
+                        onClick={() => removePhoto(url)}
+                        aria-label="사진 삭제"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))
+                })()}
               </div>
-              <input type="file" accept="image/*" onChange={handleImageSelect} disabled={uploading} />
+
               <div className="thumb-picker">
                 {GRADIENTS.map((g) => (
                   <button

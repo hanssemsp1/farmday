@@ -140,6 +140,14 @@ export default function ProductDetailPage() {
           <p className="pd-no-description">등록된 상세 설명이 없어요.</p>
         )}
       </div>
+
+      {product.detailImages && product.detailImages.length > 0 && (
+        <div className="pd-gallery">
+          {product.detailImages.map((url, i) => (
+            <img key={url} src={url} alt={`${product.name} 상세 이미지 ${i + 1}`} className="pd-gallery-img" />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

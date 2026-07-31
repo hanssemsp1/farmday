@@ -10,6 +10,7 @@ export interface Product {
   reviewCount: number
   thumbnail: string
   description?: string
+  detailImages?: string[]
   badges?: ('best' | 'new' | 'sale')[]
   soldOut?: boolean
 }

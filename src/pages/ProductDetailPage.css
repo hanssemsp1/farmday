@@ -86,6 +86,17 @@
 .pd-description p { font-size: 14px; line-height: 1.8; margin: 0 0 8px; color: var(--text); }
 .pd-no-description { color: var(--text-muted); }
 
+.pd-gallery {
+  border-top: 1px solid var(--border);
+  margin-top: 32px;
+  padding-top: 32px;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.pd-gallery-img { width: 100%; display: block; }
+
 @media (max-width: 768px) {
   .pd-layout { grid-template-columns: 1fr; gap: 24px; }
 }

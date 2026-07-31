@@ -13,6 +13,7 @@ interface DbProduct {
   review_count: number
   thumbnail: string
   description: string | null
+  detail_images: string[] | null
   badges: Product['badges']
   sold_out: boolean
 }
@@ -30,6 +31,7 @@ function fromDb(row: DbProduct): Product {
     reviewCount: row.review_count,
     thumbnail: row.thumbnail,
     description: row.description ?? undefined,
+    detailImages: row.detail_images ?? [],
     badges: row.badges ?? [],
     soldOut: row.sold_out,
   }
@@ -47,6 +49,7 @@ function toDb(input: Omit<Product, 'id'>) {
     review_count: input.reviewCount,
     thumbnail: input.thumbnail,
     description: input.description ?? null,
+    detail_images: input.detailImages ?? [],
     badges: input.badges ?? [],
     sold_out: input.soldOut ?? false,
   }
