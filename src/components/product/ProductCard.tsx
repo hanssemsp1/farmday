@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { MouseEvent, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Product } from '../../types/product'
 import Icon from '../ui/Icon'
 import { useFavorites } from '../../context/FavoritesContext'
@@ -17,21 +18,32 @@ export default function ProductCard({ product }: { product: Product }) {
   const favorited = isFavorite(product.id)
   const [added, setAdded] = useState(false)
 
-  function handleAddToCart() {
+  function handleToggleFavorite(e: MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    toggleFavorite(product.id)
+  }
+
+  function handleAddToCart(e: MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
     addToCart(product.id)
     setAdded(true)
     setTimeout(() => setAdded(false), 1500)
   }
 
   return (
-    <article className={`product-card ${product.soldOut ? 'is-sold-out' : ''}`}>
+    <Link
+      to={`/product/${product.id}`}
+      className={`product-card ${product.soldOut ? 'is-sold-out' : ''}`}
+    >
       <div className="product-thumb" style={{ background: product.thumbnail }}>
         {product.soldOut && <div className="sold-out-overlay">SOLD OUT</div>}
         <button
           className={`wish-btn ${favorited ? 'active' : ''}`}
           aria-label={favorited ? '찜 해제' : '찜하기'}
           aria-pressed={favorited}
-          onClick={() => toggleFavorite(product.id)}
+          onClick={handleToggleFavorite}
         >
           <Icon name="heart" className="icon-sm" />
         </button>
@@ -71,6 +83,6 @@ export default function ProductCard({ product }: { product: Product }) {
           </button>
         )}
       </div>
-    </article>
+    </Link>
   )
 }

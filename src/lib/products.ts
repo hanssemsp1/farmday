@@ -12,6 +12,7 @@ interface DbProduct {
   rating: number
   review_count: number
   thumbnail: string
+  description: string | null
   badges: Product['badges']
   sold_out: boolean
 }
@@ -28,6 +29,7 @@ function fromDb(row: DbProduct): Product {
     rating: row.rating,
     reviewCount: row.review_count,
     thumbnail: row.thumbnail,
+    description: row.description ?? undefined,
     badges: row.badges ?? [],
     soldOut: row.sold_out,
   }
@@ -44,6 +46,7 @@ function toDb(input: Omit<Product, 'id'>) {
     rating: input.rating,
     review_count: input.reviewCount,
     thumbnail: input.thumbnail,
+    description: input.description ?? null,
     badges: input.badges ?? [],
     sold_out: input.soldOut ?? false,
   }
@@ -52,6 +55,11 @@ function toDb(input: Omit<Product, 'id'>) {
 export async function fetchProducts(): Promise<{ data: Product[]; error: string | null }> {
   const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false })
   return { data: ((data as DbProduct[]) ?? []).map(fromDb), error: error?.message ?? null }
+}
+
+export async function fetchProductById(id: string): Promise<{ data: Product | null; error: string | null }> {
+  const { data, error } = await supabase.from('products').select('*').eq('id', id).single()
+  return { data: data ? fromDb(data as DbProduct) : null, error: error?.message ?? null }
 }
 
 export async function createProduct(input: Omit<Product, 'id'>) {

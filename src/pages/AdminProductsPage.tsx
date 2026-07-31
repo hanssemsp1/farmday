@@ -1,9 +1,10 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useProducts } from '../context/ProductsContext'
 import { isAdmin } from '../lib/adminConfig'
 import { createProduct, deleteProduct, updateProduct } from '../lib/products'
+import { uploadProductImage } from '../lib/storage'
 import { Product } from '../types/product'
 import Button from '../components/ui/Button'
 import './AdminProductsPage.css'
@@ -24,6 +25,7 @@ const EMPTY_FORM = {
   originalPrice: '',
   discountRate: '',
   thumbnail: GRADIENTS[0],
+  description: '',
   soldOut: false,
 }
 
@@ -34,6 +36,7 @@ export default function AdminProductsPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [notice, setNotice] = useState('')
 
   useEffect(() => {
@@ -58,6 +61,7 @@ export default function AdminProductsPage() {
       originalPrice: p.originalPrice ? String(p.originalPrice) : '',
       discountRate: p.discountRate ? String(p.discountRate) : '',
       thumbnail: p.thumbnail,
+      description: p.description ?? '',
       soldOut: p.soldOut ?? false,
     })
     setNotice('')
@@ -65,6 +69,20 @@ export default function AdminProductsPage() {
 
   function cancelEdit() {
     setEditingId(null)
+  }
+
+  async function handleImageSelect(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setNotice('')
+    const { url, error } = await uploadProductImage(file)
+    setUploading(false)
+    if (error || !url) {
+      setNotice(`이미지 업로드 중 오류가 발생했어요: ${error}`)
+      return
+    }
+    setForm((f) => ({ ...f, thumbnail: `url("${url}") center/cover no-repeat` }))
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -86,6 +104,7 @@ export default function AdminProductsPage() {
       rating: 0,
       reviewCount: 0,
       thumbnail: form.thumbnail,
+      description: form.description.trim() || undefined,
       badges: [],
       soldOut: form.soldOut,
     }
@@ -140,7 +159,11 @@ export default function AdminProductsPage() {
               </select>
             </div>
             <div className="admin-field">
-              <label>썸네일 색상</label>
+              <label>상품 사진</label>
+              <div className="thumb-preview" style={{ background: form.thumbnail }}>
+                {uploading && <span className="thumb-uploading">업로드 중...</span>}
+              </div>
+              <input type="file" accept="image/*" onChange={handleImageSelect} disabled={uploading} />
               <div className="thumb-picker">
                 {GRADIENTS.map((g) => (
                   <button
@@ -149,7 +172,7 @@ export default function AdminProductsPage() {
                     className={`thumb-swatch ${form.thumbnail === g ? 'active' : ''}`}
                     style={{ background: g }}
                     onClick={() => setForm({ ...form, thumbnail: g })}
-                    aria-label="썸네일 색상 선택"
+                    aria-label="기본 색상 선택"
                   />
                 ))}
               </div>
@@ -189,13 +212,22 @@ export default function AdminProductsPage() {
                 품절 처리
               </label>
             </div>
+            <div className="admin-field admin-field-wide">
+              <label>상세 설명</label>
+              <textarea
+                rows={6}
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                placeholder="상품 상세페이지에 보여줄 설명을 입력하세요"
+              />
+            </div>
           </div>
 
           {notice && <p className="admin-notice">{notice}</p>}
 
           <div className="admin-form-actions">
             <Button variant="outline" type="button" onClick={cancelEdit}>취소</Button>
-            <Button type="submit" variant="accent" disabled={submitting}>
+            <Button type="submit" variant="accent" disabled={submitting || uploading}>
               {submitting ? '저장 중...' : '저장'}
             </Button>
           </div>
