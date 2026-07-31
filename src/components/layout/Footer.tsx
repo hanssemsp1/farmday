@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom'
+import { useSiteSettings } from '../../context/SiteSettingsContext'
 import './Footer.css'
 
 export default function Footer() {
+  const { settings } = useSiteSettings()
+
   return (
     <footer className="footer">
       <div className="container footer-inner">
@@ -31,9 +34,19 @@ export default function Footer() {
         </div>
         <div className="footer-bottom">
           <p>
-            (주)팜데이 · 대표 홍길동 · 사업자등록번호 000-00-00000
-            <br />
-            서울특별시 어딘가 123 · 고객센터 1544-0000 (평일 09:00–18:00)
+            {settings ? (
+              <>
+                {settings.companyName} · 대표 {settings.ceoName} · 사업자등록번호 {settings.businessRegNo}
+                <br />
+                {settings.address} · 고객센터 {settings.phone} (평일 09:00–18:00)
+              </>
+            ) : (
+              <>
+                (주)팜데이 · 대표 홍길동 · 사업자등록번호 000-00-00000
+                <br />
+                서울특별시 어딘가 123 · 고객센터 1544-0000 (평일 09:00–18:00)
+              </>
+            )}
           </p>
           <p className="footer-copyright">&copy; {new Date().getFullYear()} Farmday. All rights reserved.</p>
         </div>

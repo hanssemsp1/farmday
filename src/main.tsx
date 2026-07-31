@@ -6,6 +6,7 @@ import { FavoritesProvider } from './context/FavoritesContext'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import { ProductsProvider } from './context/ProductsContext'
+import { SiteSettingsProvider } from './context/SiteSettingsContext'
 import './styles/tokens.css'
 import './styles/global.css'
 
@@ -14,11 +15,13 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <AuthProvider>
         <ProductsProvider>
-          <FavoritesProvider>
-            <CartProvider>
-              <App />
-            </CartProvider>
-          </FavoritesProvider>
+          <SiteSettingsProvider>
+            <FavoritesProvider>
+              <CartProvider>
+                <App />
+              </CartProvider>
+            </FavoritesProvider>
+          </SiteSettingsProvider>
         </ProductsProvider>
       </AuthProvider>
     </BrowserRouter>

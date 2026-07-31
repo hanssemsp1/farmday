@@ -62,9 +62,14 @@ export default function Header() {
             <Icon name="user" />
           </Link>
           {isAdmin(user) && (
-            <Link to="/admin/products" className="btn btn-sm btn-outline">
-              상품 관리
-            </Link>
+            <>
+              <Link to="/admin/products" className="btn btn-sm btn-outline">
+                상품 관리
+              </Link>
+              <Link to="/admin/settings" className="btn btn-sm btn-outline">
+                사이트 설정
+              </Link>
+            </>
           )}
           {user ? (
             <button className="btn btn-sm btn-outline" onClick={handleSignOut}>

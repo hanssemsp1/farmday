@@ -20,6 +20,7 @@ import CheckoutSuccessPage from './pages/CheckoutSuccessPage'
 import CheckoutFailPage from './pages/CheckoutFailPage'
 import NotificationsPage from './pages/NotificationsPage'
 import AdminProductsPage from './pages/AdminProductsPage'
+import AdminSettingsPage from './pages/AdminSettingsPage'
 import ProductDetailPage from './pages/ProductDetailPage'
 
 export default function App() {
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
           <Route path="/checkout/fail" element={<CheckoutFailPage />} />
           <Route path="/admin/products" element={<AdminProductsPage />} />
+          <Route path="/admin/settings" element={<AdminSettingsPage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
         </Routes>
       </main>
