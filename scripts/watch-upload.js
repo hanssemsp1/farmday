@@ -148,6 +148,14 @@ async function main() {
     if (path.dirname(categoryDir) !== ROOT) return
     scheduleProcess(productDir)
   })
+
+  watcher.on('error', (err) => {
+    console.error('[감시 오류]', err.message)
+  })
 }
+
+process.on('unhandledRejection', (err) => {
+  console.error('[처리되지 않은 오류]', err instanceof Error ? err.message : err)
+})
 
 main()
