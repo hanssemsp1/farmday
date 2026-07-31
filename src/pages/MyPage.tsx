@@ -117,6 +117,7 @@ export default function MyPage() {
                   <p className="order-meta">{new Date(order.created_at).toLocaleDateString('ko-KR')}</p>
                   <p className="order-name">
                     {order.items[0]?.name}
+                    {order.items[0]?.optionName && ` (${order.items[0].optionName})`}
                     {order.items.length > 1 && ` 외 ${order.items.length - 1}건`}
                   </p>
                 </div>

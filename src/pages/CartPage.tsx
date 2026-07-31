@@ -30,7 +30,10 @@ export default function CartPage() {
 
   const allSelected = items.length > 0 && items.every((i) => i.line.selected)
   const selectedItems = items.filter((i) => i.line.selected)
-  const subtotal = selectedItems.reduce((sum, i) => sum + i.product.price * i.line.quantity, 0)
+  const subtotal = selectedItems.reduce(
+    (sum, i) => sum + (i.line.optionPrice ?? i.product.price) * i.line.quantity,
+    0,
+  )
   const shipping = selectedItems.length === 0 || subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
   const total = subtotal + shipping
 
@@ -45,9 +48,10 @@ export default function CartPage() {
       productId: product.id,
       name: product.name,
       brand: product.brand,
-      price: product.price,
+      price: line.optionPrice ?? product.price,
       quantity: line.quantity,
       thumbnail: product.thumbnail,
+      optionName: line.optionName,
     }))
     const { data: order, error } = await createOrder(orderItems, total)
     if (error || !order) {
@@ -55,7 +59,7 @@ export default function CartPage() {
       setNotice(`주문 처리 중 오류가 발생했어요: ${error}`)
       return
     }
-    removeLines(orderItems.map((i) => i.productId))
+    removeLines(selectedItems.map(({ product, line }) => ({ productId: product.id, optionId: line.optionId })))
 
     try {
       await requestTossPayment({
@@ -121,48 +125,58 @@ export default function CartPage() {
             </button>
           </div>
 
-          {items.map(({ line, product }) => (
-            <div key={product.id} className="cart-item">
-              <label className="cart-checkbox">
-                <input
-                  type="checkbox"
-                  checked={line.selected}
-                  onChange={(e) => toggleLine(product.id, e.target.checked)}
-                />
-              </label>
+          {items.map(({ line, product }) => {
+            const unitPrice = line.optionPrice ?? product.price
+            return (
+              <div key={`${product.id}::${line.optionId ?? ''}`} className="cart-item">
+                <label className="cart-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={line.selected}
+                    onChange={(e) => toggleLine(product.id, line.optionId, e.target.checked)}
+                  />
+                </label>
 
-              <div className="cart-item-thumb" style={{ background: product.thumbnail }} />
+                <div className="cart-item-thumb" style={{ background: product.thumbnail }} />
 
-              <div className="cart-item-info">
-                <p className="cart-item-brand">{product.brand}</p>
-                <p className="cart-item-name">{product.name}</p>
-                <p className="cart-item-price">{product.price.toLocaleString()}원</p>
-              </div>
+                <div className="cart-item-info">
+                  <p className="cart-item-brand">{product.brand}</p>
+                  <p className="cart-item-name">{product.name}</p>
+                  {line.optionName && <p className="cart-item-option">옵션: {line.optionName}</p>}
+                  <p className="cart-item-price">{unitPrice.toLocaleString()}원</p>
+                </div>
 
-              <div className="cart-item-qty">
+                <div className="cart-item-qty">
+                  <button
+                    className="qty-btn"
+                    aria-label="수량 감소"
+                    onClick={() => updateQuantity(product.id, line.optionId, -1)}
+                    disabled={line.quantity <= 1}
+                  >
+                    <Icon name="minus" className="icon-sm" />
+                  </button>
+                  <span className="qty-value">{line.quantity}</span>
+                  <button
+                    className="qty-btn"
+                    aria-label="수량 증가"
+                    onClick={() => updateQuantity(product.id, line.optionId, 1)}
+                  >
+                    <Icon name="plus" className="icon-sm" />
+                  </button>
+                </div>
+
+                <div className="cart-item-subtotal">{(unitPrice * line.quantity).toLocaleString()}원</div>
+
                 <button
-                  className="qty-btn"
-                  aria-label="수량 감소"
-                  onClick={() => updateQuantity(product.id, -1)}
-                  disabled={line.quantity <= 1}
+                  className="cart-item-remove"
+                  aria-label="삭제"
+                  onClick={() => removeLine(product.id, line.optionId)}
                 >
-                  <Icon name="minus" className="icon-sm" />
-                </button>
-                <span className="qty-value">{line.quantity}</span>
-                <button className="qty-btn" aria-label="수량 증가" onClick={() => updateQuantity(product.id, 1)}>
-                  <Icon name="plus" className="icon-sm" />
+                  <Icon name="trash" className="icon-sm" />
                 </button>
               </div>
-
-              <div className="cart-item-subtotal">
-                {(product.price * line.quantity).toLocaleString()}원
-              </div>
-
-              <button className="cart-item-remove" aria-label="삭제" onClick={() => removeLine(product.id)}>
-                <Icon name="trash" className="icon-sm" />
-              </button>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         <aside className="cart-summary">

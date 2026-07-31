@@ -4,23 +4,36 @@ export interface CartLine {
   productId: string
   quantity: number
   selected: boolean
+  optionId?: string
+  optionName?: string
+  optionPrice?: number
+}
+
+export interface CartOption {
+  id: string
+  name: string
+  price: number
 }
 
 interface CartContextValue {
   lines: CartLine[]
   itemCount: number
-  addToCart: (productId: string, quantity?: number) => void
+  addToCart: (productId: string, quantity?: number, option?: CartOption) => void
   toggleAll: (checked: boolean) => void
-  toggleLine: (productId: string, checked: boolean) => void
-  updateQuantity: (productId: string, delta: number) => void
-  removeLine: (productId: string) => void
+  toggleLine: (productId: string, optionId: string | undefined, checked: boolean) => void
+  updateQuantity: (productId: string, optionId: string | undefined, delta: number) => void
+  removeLine: (productId: string, optionId: string | undefined) => void
   removeSelected: () => void
-  removeLines: (productIds: string[]) => void
+  removeLines: (keys: { productId: string; optionId?: string }[]) => void
 }
 
 const CART_STORAGE_KEY = 'farmday_cart'
 
 const DEFAULT_LINES: CartLine[] = []
+
+function lineKey(productId: string, optionId?: string) {
+  return `${productId}::${optionId ?? ''}`
+}
 
 function readStoredCart(): CartLine[] {
   try {
@@ -44,15 +57,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  function addToCart(productId: string, quantity = 1) {
+  function addToCart(productId: string, quantity = 1, option?: CartOption) {
     setLines((prev) => {
-      const existing = prev.find((l) => l.productId === productId)
+      const key = lineKey(productId, option?.id)
+      const existing = prev.find((l) => lineKey(l.productId, l.optionId) === key)
       if (existing) {
         return prev.map((l) =>
-          l.productId === productId ? { ...l, quantity: Math.min(99, l.quantity + quantity) } : l,
+          lineKey(l.productId, l.optionId) === key ? { ...l, quantity: Math.min(99, l.quantity + quantity) } : l,
         )
       }
-      return [...prev, { productId, quantity, selected: true }]
+      return [
+        ...prev,
+        {
+          productId,
+          quantity,
+          selected: true,
+          optionId: option?.id,
+          optionName: option?.name,
+          optionPrice: option?.price,
+        },
+      ]
     })
   }
 
@@ -60,28 +84,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLines((prev) => prev.map((l) => ({ ...l, selected: checked })))
   }
 
-  function toggleLine(productId: string, checked: boolean) {
-    setLines((prev) => prev.map((l) => (l.productId === productId ? { ...l, selected: checked } : l)))
+  function toggleLine(productId: string, optionId: string | undefined, checked: boolean) {
+    const key = lineKey(productId, optionId)
+    setLines((prev) => prev.map((l) => (lineKey(l.productId, l.optionId) === key ? { ...l, selected: checked } : l)))
   }
 
-  function updateQuantity(productId: string, delta: number) {
+  function updateQuantity(productId: string, optionId: string | undefined, delta: number) {
+    const key = lineKey(productId, optionId)
     setLines((prev) =>
       prev.map((l) =>
-        l.productId === productId ? { ...l, quantity: Math.min(99, Math.max(1, l.quantity + delta)) } : l,
+        lineKey(l.productId, l.optionId) === key
+          ? { ...l, quantity: Math.min(99, Math.max(1, l.quantity + delta)) }
+          : l,
       ),
     )
   }
 
-  function removeLine(productId: string) {
-    setLines((prev) => prev.filter((l) => l.productId !== productId))
+  function removeLine(productId: string, optionId: string | undefined) {
+    const key = lineKey(productId, optionId)
+    setLines((prev) => prev.filter((l) => lineKey(l.productId, l.optionId) !== key))
   }
 
   function removeSelected() {
     setLines((prev) => prev.filter((l) => !l.selected))
   }
 
-  function removeLines(productIds: string[]) {
-    setLines((prev) => prev.filter((l) => !productIds.includes(l.productId)))
+  function removeLines(keys: { productId: string; optionId?: string }[]) {
+    const removeSet = new Set(keys.map((k) => lineKey(k.productId, k.optionId)))
+    setLines((prev) => prev.filter((l) => !removeSet.has(lineKey(l.productId, l.optionId))))
   }
 
   const itemCount = lines.reduce((sum, l) => sum + l.quantity, 0)

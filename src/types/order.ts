@@ -5,6 +5,7 @@ export interface OrderItem {
   price: number
   quantity: number
   thumbnail: string
+  optionName?: string
 }
 
 export interface DbOrder {

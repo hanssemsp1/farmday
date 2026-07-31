@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useProducts } from '../context/ProductsContext'
 import { isAdmin } from '../lib/adminConfig'
 import { createProduct, deleteProduct, updateProduct } from '../lib/products'
+import { fetchProductOptions, replaceProductOptions } from '../lib/productOptions'
 import { uploadProductImage } from '../lib/storage'
 import { Product } from '../types/product'
 import Button from '../components/ui/Button'
@@ -28,6 +29,7 @@ const EMPTY_FORM = {
   description: '',
   detailImages: [] as string[],
   soldOut: false,
+  options: [] as { name: string; price: string; soldOut: boolean }[],
 }
 
 function extractUrl(thumbnail: string): string | null {
@@ -57,7 +59,7 @@ export default function AdminProductsPage() {
     setNotice('')
   }
 
-  function startEdit(p: Product) {
+  async function startEdit(p: Product) {
     setEditingId(p.id)
     setForm({
       name: p.name,
@@ -70,12 +72,34 @@ export default function AdminProductsPage() {
       description: p.description ?? '',
       detailImages: p.detailImages ?? [],
       soldOut: p.soldOut ?? false,
+      options: [],
     })
     setNotice('')
+
+    const { data: options } = await fetchProductOptions(p.id)
+    setForm((f) => ({
+      ...f,
+      options: options.map((o) => ({ name: o.name, price: String(o.price), soldOut: o.soldOut })),
+    }))
   }
 
   function cancelEdit() {
     setEditingId(null)
+  }
+
+  function addOptionRow() {
+    setForm((f) => ({ ...f, options: [...f.options, { name: '', price: '', soldOut: false }] }))
+  }
+
+  function updateOptionRow(index: number, patch: Partial<{ name: string; price: string; soldOut: boolean }>) {
+    setForm((f) => ({
+      ...f,
+      options: f.options.map((o, i) => (i === index ? { ...o, ...patch } : o)),
+    }))
+  }
+
+  function removeOptionRow(index: number) {
+    setForm((f) => ({ ...f, options: f.options.filter((_, i) => i !== index) }))
   }
 
   async function handleBulkImageSelect(e: ChangeEvent<HTMLInputElement>) {
@@ -148,12 +172,23 @@ export default function AdminProductsPage() {
       soldOut: form.soldOut,
     }
 
-    const { error } =
+    const { data: savedProduct, error } =
       editingId === 'new' ? await createProduct(input) : await updateProduct(editingId!, input)
 
-    setSubmitting(false)
-    if (error) {
+    if (error || !savedProduct) {
+      setSubmitting(false)
       setNotice(`저장 중 오류가 발생했어요: ${error}`)
+      return
+    }
+
+    const cleanOptions = form.options
+      .filter((o) => o.name.trim() && o.price)
+      .map((o) => ({ name: o.name.trim(), price: Number(o.price), soldOut: o.soldOut }))
+
+    const { error: optionsError } = await replaceProductOptions(savedProduct.id, cleanOptions)
+    setSubmitting(false)
+    if (optionsError) {
+      setNotice(`옵션 저장 중 오류가 발생했어요: ${optionsError}`)
       return
     }
     setEditingId(null)
@@ -282,6 +317,41 @@ export default function AdminProductsPage() {
                 />
                 품절 처리
               </label>
+            </div>
+            <div className="admin-field admin-field-wide">
+              <label>옵션 (선택 — 용량/무게 등, 각 옵션마다 실제 가격을 입력하세요)</label>
+              <div className="option-rows">
+                {form.options.map((o, i) => (
+                  <div key={i} className="option-row">
+                    <input
+                      type="text"
+                      placeholder="옵션명 (예: 2kg)"
+                      value={o.name}
+                      onChange={(e) => updateOptionRow(i, { name: e.target.value })}
+                    />
+                    <input
+                      type="number"
+                      placeholder="가격(원)"
+                      value={o.price}
+                      onChange={(e) => updateOptionRow(i, { price: e.target.value })}
+                    />
+                    <label className="option-row-soldout">
+                      <input
+                        type="checkbox"
+                        checked={o.soldOut}
+                        onChange={(e) => updateOptionRow(i, { soldOut: e.target.checked })}
+                      />
+                      품절
+                    </label>
+                    <button type="button" className="option-row-remove" onClick={() => removeOptionRow(i)}>
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button type="button" className="text-btn" onClick={addOptionRow}>
+                + 옵션 추가
+              </button>
             </div>
             <div className="admin-field admin-field-wide">
               <label>상세 설명</label>

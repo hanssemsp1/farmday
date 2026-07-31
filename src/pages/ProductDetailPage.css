@@ -49,6 +49,18 @@
   margin-bottom: 16px;
 }
 
+.pd-option-select {
+  flex: 1;
+  max-width: 260px;
+  margin-left: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 10px 12px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+}
+
 .pd-total-row {
   display: flex;
   align-items: center;

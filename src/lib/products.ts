@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient'
 import { Product } from '../types/product'
+import { fetchProductOptions } from './productOptions'
 
 interface DbProduct {
   id: string
@@ -62,7 +63,9 @@ export async function fetchProducts(): Promise<{ data: Product[]; error: string 
 
 export async function fetchProductById(id: string): Promise<{ data: Product | null; error: string | null }> {
   const { data, error } = await supabase.from('products').select('*').eq('id', id).single()
-  return { data: data ? fromDb(data as DbProduct) : null, error: error?.message ?? null }
+  if (!data) return { data: null, error: error?.message ?? null }
+  const { data: options } = await fetchProductOptions(id)
+  return { data: { ...fromDb(data as DbProduct), options }, error: error?.message ?? null }
 }
 
 export async function createProduct(input: Omit<Product, 'id'>) {

@@ -118,6 +118,33 @@
   justify-content: center;
 }
 
+.option-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.option-row input[type="text"] { flex: 2; }
+.option-row input[type="number"] { flex: 1; }
+.option-row-soldout {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.option-row-remove {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 .thumb-picker { display: flex; gap: 8px; }
 .thumb-swatch {
   width: 32px;

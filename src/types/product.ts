@@ -1,3 +1,11 @@
+export interface ProductOption {
+  id: string
+  name: string
+  price: number
+  soldOut: boolean
+  sortOrder: number
+}
+
 export interface Product {
   id: string
   name: string
@@ -13,4 +21,5 @@ export interface Product {
   detailImages?: string[]
   badges?: ('best' | 'new' | 'sale')[]
   soldOut?: boolean
+  options?: ProductOption[]
 }

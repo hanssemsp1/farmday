@@ -57,6 +57,7 @@ export default function OrderHistoryPage() {
                 </p>
                 <p className="order-history-name">
                   {order.items[0]?.name}
+                  {order.items[0]?.optionName && ` (${order.items[0].optionName})`}
                   {order.items.length > 1 && (
                     <span className="order-history-qty"> 외 {order.items.length - 1}건</span>
                   )}
