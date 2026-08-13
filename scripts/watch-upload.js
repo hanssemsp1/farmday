@@ -57,7 +57,9 @@ async function processProduct(productDir) {
   if (files.length === 0) return
 
   const thumbFiles = sortByThumbNumber(files.filter((f) => /썸네일/.test(f)))
-  const otherFiles = files.filter((f) => !/썸네일/.test(f)).sort((a, b) => a.localeCompare(b, 'ko'))
+  const otherFiles = files
+    .filter((f) => !/썸네일/.test(f))
+    .sort((a, b) => a.localeCompare(b, 'ko', { numeric: true }))
   const orderedFiles = [...thumbFiles, ...otherFiles]
 
   console.log(`[시작] ${category}/${name} 사진 ${orderedFiles.length}장 업로드 중...`)

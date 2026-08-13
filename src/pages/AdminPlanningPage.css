@@ -1,0 +1,194 @@
+/* 상품 기획 — 대표님 엑셀 표를 그대로 */
+.plan{
+  --line:#D9D5CC; --grid:#E7E4DC; --mute:#8C877B; --ink:#1B1A16;
+  --head:#1F3864; --headtx:#fff; --sub:#F2F0EA;
+  --green:#4A7C59; --red:#B3261E; --amber:#A66A00; --gold:#B08A3E;
+  --auto:#FFFBEA;
+  --c-야채:#1E4032; --c-과일:#6E1E2C; --c-수산:#182A4A; --c-축산:#5C2A33; --c-식품:#9C4A2F;
+  padding-bottom:96px;
+}
+.plan .icon{width:14px;height:14px;fill:currentColor;flex-shrink:0}
+
+.plan-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;
+  padding:30px 0 22px;border-bottom:1px solid var(--line)}
+.plan-head h1{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.plan-head p{margin-top:7px;font-size:13px;color:var(--mute);line-height:1.65}
+
+.plan-body{display:grid;grid-template-columns:250px 1fr;gap:30px;align-items:start}
+
+/* 왼쪽 목록 */
+.plan-side{position:sticky;top:16px;display:flex;flex-direction:column;gap:12px;
+  max-height:calc(100vh - 60px);padding-top:20px}
+.plan-search{width:100%;border:0;border-bottom:1px solid var(--line);background:0;
+  padding:7px 0;font-size:14px;outline:0}
+.plan-search:focus{border-bottom-color:var(--gold)}
+.plan-cats{display:flex;flex-wrap:wrap;gap:5px 12px}
+.plan-cats button{background:0;border:0;cursor:pointer;font-size:12.5px;color:var(--mute);
+  padding:2px 0;border-bottom:2px solid transparent;display:inline-flex;align-items:center;gap:4px}
+.plan-cats button.on{color:var(--ink);font-weight:700;border-bottom-color:currentColor}
+.plan-list{overflow-y:auto;flex:1;margin:0 -10px}
+.plan-empty{padding:20px 10px;font-size:13px;color:var(--mute)}
+.plan-row{display:block;width:100%;text-align:left;background:0;border:0;cursor:pointer;
+  padding:10px;border-left:3px solid transparent}
+.plan-row:hover{background:#F4F2ED}
+.plan-row.on{background:#fff;border-left-color:var(--gold);box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.plan-row[data-cat="야채"].on{border-left-color:var(--c-야채)}
+.plan-row[data-cat="과일"].on{border-left-color:var(--c-과일)}
+.plan-row[data-cat="수산"].on{border-left-color:var(--c-수산)}
+.plan-row[data-cat="축산"].on{border-left-color:var(--c-축산)}
+.plan-row[data-cat="식품"].on{border-left-color:var(--c-식품)}
+.plan-row-t{display:flex;align-items:center;gap:6px}
+.plan-row-t b{font-size:14px;font-weight:700}
+.plan-row-t em{margin-left:auto;font-size:7px;color:var(--gold);font-style:normal;letter-spacing:1px}
+.plan-row-s{display:block;font-size:11.5px;color:var(--mute);margin-top:3px;padding-left:20px}
+
+/* 오른쪽 */
+.plan-main{min-width:0;padding-top:20px}
+.plan-blank{display:grid;place-items:center;gap:14px;text-align:center;padding:80px 20px;color:var(--mute)}
+.plan-blank b{font-size:19px;color:#3E3A31;font-weight:800}
+.plan-blank p{font-size:13.5px;line-height:1.75}
+
+.sheet-title{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.sheet-title .icon{width:22px;height:22px;color:var(--gold)}
+.sheet[data-cat="야채"] .sheet-title .icon{color:var(--c-야채)}
+.sheet[data-cat="과일"] .sheet-title .icon{color:var(--c-과일)}
+.sheet[data-cat="수산"] .sheet-title .icon{color:var(--c-수산)}
+.sheet[data-cat="축산"] .sheet-title .icon{color:var(--c-축산)}
+.sheet[data-cat="식품"] .sheet-title .icon{color:var(--c-식품)}
+.sheet-title h2{font-size:27px;font-weight:800;letter-spacing:-.03em}
+.sheet-done{margin-left:auto;font-size:20px;font-weight:800;color:var(--gold)}
+.sheet-done em{font-size:11.5px;font-style:normal;color:var(--mute);font-weight:600}
+
+/* ── 엑셀 표 ─────────────────────────────────── */
+.xl{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;
+  border:1px solid var(--line);margin-bottom:4px}
+.xl th,.xl td{border:1px solid var(--grid);padding:0;vertical-align:middle}
+.xl input,.xl textarea,.xl select{width:100%;border:0;background:0;outline:0;padding:8px 10px;
+  font-size:13.5px;font-family:inherit;color:inherit}
+/* 글이 길어지면 저절로 늘어난다 — 스크롤바 없이 전부 보이게 */
+.xl textarea{resize:none;overflow:hidden;line-height:1.65;display:block}
+.xl textarea.tags{line-height:1.9;word-spacing:.06em}
+.xl input:focus,.xl textarea:focus,.xl select:focus{background:#FFFDF5;box-shadow:inset 0 0 0 2px var(--gold)}
+
+/* 왼쪽 항목 칸 */
+.xl .rowhead{background:var(--head);color:var(--headtx);font-weight:700;font-size:12.5px;
+  padding:9px 11px;text-align:left;white-space:nowrap;width:124px;
+  display:table-cell;letter-spacing:-.01em}
+.xl .rowhead .icon{margin-right:6px;vertical-align:-2px;opacity:.85}
+.xl .rowhead b{display:block;font-size:10px;opacity:.7;font-weight:600;margin-top:2px}
+.xl .rowhead b.full{color:#9BE8A9;opacity:1}
+.xl .sub{background:var(--sub);color:#5E594D;font-size:12px;padding:8px 10px;
+  white-space:nowrap;width:112px}
+.xl .sub .icon{margin-right:5px;vertical-align:-2px;color:var(--mute)}
+.xl .fill{width:auto}
+.xl .fill .strong{font-weight:700;font-size:14px}
+.xl .catrow{display:flex;gap:0}
+.xl .catrow>*{border-right:1px solid var(--grid)}
+.xl .catrow>*:last-child{border-right:0}
+
+/* 머리글 띠 */
+.xl-head{display:flex;align-items:center;gap:8px;margin:26px 0 0;padding:9px 12px;
+  background:var(--head);color:#fff;font-size:13px;font-weight:700;letter-spacing:-.01em}
+.xl-head .icon{opacity:.85}
+.xl-head .cnt{font-weight:600;opacity:.8;font-size:11.5px}
+.xl-head .reg{margin-left:auto;display:flex;align-items:center;gap:7px;
+  font-size:11.5px;font-weight:600;opacity:.9}
+.xl-head .reg input{width:150px;background:rgba(255,255,255,.14);border:0;outline:0;
+  color:#fff;padding:4px 8px;font-size:12px;font-family:inherit}
+.xl-head .reg input::placeholder{color:rgba(255,255,255,.5)}
+.xl-head .addw{margin-left:auto;background:rgba(255,255,255,.15);border:0;cursor:pointer;
+  color:#fff;font-size:11.5px;padding:4px 10px;font-weight:600;font-family:inherit}
+.xl-head .addw:hover{background:rgba(255,255,255,.28)}
+
+/* 격자형 표 */
+.xl-scroll{overflow-x:auto}
+.xl.grid{min-width:640px;margin-bottom:0}
+.xl.grid thead th{background:var(--sub);color:#5E594D;font-size:11.5px;font-weight:700;
+  padding:7px 9px;text-align:right;white-space:nowrap}
+.xl.grid thead th.l,.xl.grid td.l{text-align:left}
+.xl.grid thead th.auto-th{background:var(--auto);color:#8A7433}
+.xl.grid td{text-align:right}
+.xl.grid input,.xl.grid select{text-align:right;padding:7px 9px}
+.xl.grid td.l input{text-align:left}
+.xl.grid select{text-align:left;cursor:pointer;color:var(--mute)}
+.xl.grid td.auto{background:var(--auto);color:#7A6A3A;padding:7px 9px;
+  font-variant-numeric:tabular-nums;font-weight:600}
+.xl.grid td.net{font-weight:800}
+.xl.grid td.net.bad{color:var(--red)}
+.xl.grid td.net.thin{color:var(--amber)}
+.xl.grid tr.bad td:not(.auto){background:#FCF1F0}
+.xl.grid tr.thin td:not(.auto){background:#FDF9F0}
+.xl .w1{width:30px} .xl .w2{width:64px}
+/* 숫자·중량 칸은 좁게, 이름 칸은 남는 폭을 다 쓴다 */
+.xl.grid th:not(.l):not(.w1):not(.w2){width:92px}
+.xl.grid th.l{width:auto;min-width:220px}
+.xl .x{background:0;border:0;cursor:pointer;color:#C6BFB0;font-size:15px;padding:3px 5px;line-height:1}
+.xl .x:hover{color:var(--red)}
+.xl-add{margin:8px 0 0;background:0;border:0;cursor:pointer;color:var(--gold);
+  font-size:12.5px;font-weight:700;padding:0}
+.xl-hint{margin:10px 0 0;padding:11px 14px;background:#F4F2ED;font-size:12.5px;color:#6B665A}
+
+/* 경쟁판매가 */
+.comp th.w2{background:var(--sub);color:#5E594D;font-size:11.5px;font-weight:700;
+  text-align:right;padding:7px 9px}
+/* 중량은 500g·1kg 정도라 좁게, 썸네일(상품명)은 길어서 넓게 */
+.xl.grid.comp th.wcol{position:relative;width:92px}
+.comp th.wcol .x{position:absolute;top:0;right:0;font-size:12px;opacity:0;transition:opacity .12s}
+.comp th.wcol:hover .x{opacity:1}
+/* .xl.grid th.l 보다 구체적이어야 이 폭이 먹는다 */
+.xl.grid.comp th.l,.xl.grid.comp td.l{width:auto;min-width:360px}
+.comp tr.auto th,.comp tr.auto td{background:var(--auto);color:#7A6A3A;font-weight:700;
+  padding:7px 9px;font-variant-numeric:tabular-nums}
+.comp tr.auto td.note{font-weight:600;font-size:11.5px;opacity:.75}
+
+.xl-warn{margin-top:10px;font-size:12.5px;color:var(--red);line-height:1.8}
+.xl-warn b{font-size:10.5px;letter-spacing:.06em;background:var(--red);color:#fff;
+  padding:2px 6px;margin-right:7px}
+.xl-warn .amber{color:var(--amber)}
+.xl-warn .amber b{background:var(--amber)}
+
+/* 상세페이지 */
+.xl.detail .rowhead{width:132px}
+.xl.detail tr.base .sub{color:var(--mute)}
+.xl.detail tr.base .rowhead{background:#5A6B87}
+.basemark{display:block;padding:9px 11px;font-size:12px;color:#A8A296}
+
+.xl-note{display:flex;gap:8px;align-items:flex-start;background:#fff;
+  border:1px solid var(--grid);border-top:0;padding:2px 6px 2px 0}
+.xl-note textarea{flex:1;border:0;background:0;outline:0;padding:9px 11px;font-size:13px;
+  color:#5E594D;line-height:1.7;resize:vertical;font-family:inherit}
+.xl-note .x{background:0;border:0;cursor:pointer;color:#C6BFB0;font-size:15px;padding:8px 4px}
+.xl-note .x:hover{color:var(--red)}
+
+.xl-reviews{background:#fff;border:1px solid var(--line);border-top:0;padding:4px 14px}
+.xl-rv{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--grid);
+  font-size:13px;line-height:1.6}
+.xl-rv:last-child{border-bottom:0}
+.xl-rv .st{color:var(--gold);font-size:11px;letter-spacing:-.5px;white-space:nowrap;padding-top:3px}
+.xl-rv .tx{flex:1;color:#454034}
+.xl-rv .pk{font-size:10.5px;color:#fff;background:var(--gold);padding:2px 6px;
+  height:fit-content;white-space:nowrap}
+
+/* 저장 바 */
+.plan-bar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);
+  backdrop-filter:blur(8px);border-top:1px solid var(--line);z-index:20;
+  padding:12px max(20px,calc((100vw - 1200px) / 2));display:flex;align-items:center;gap:14px;
+  font-size:12.5px;color:var(--mute)}
+.plan-bar .sp{flex:1}
+.plan-bar .dirty{color:var(--amber);font-weight:700}
+.plan-notice{color:var(--green);font-weight:600}
+.plan-ghost{background:0;border:1px solid var(--line);cursor:pointer;color:var(--mute);
+  padding:8px 15px;font-size:12.5px;font-family:inherit;border-radius:6px}
+.plan-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.plan-ghost.danger:hover{border-color:var(--red);color:var(--red)}
+
+@media(max-width:900px){
+  .plan-body{grid-template-columns:1fr;gap:18px}
+  .plan-side{position:static;max-height:none}
+  .plan-list{max-height:230px}
+  .plan-head{flex-direction:column;align-items:stretch}
+  .plan-bar{padding:10px 16px;flex-wrap:wrap}
+  .xl .rowhead{width:96px;font-size:11.5px}
+  .xl .sub{width:88px;font-size:11px}
+  .xl .catrow{flex-wrap:wrap}
+}

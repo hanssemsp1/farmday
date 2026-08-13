@@ -21,7 +21,11 @@ import CheckoutFailPage from './pages/CheckoutFailPage'
 import NotificationsPage from './pages/NotificationsPage'
 import AdminProductsPage from './pages/AdminProductsPage'
 import AdminSettingsPage from './pages/AdminSettingsPage'
+import AdminPlanningPage from './pages/AdminPlanningPage'
 import ProductDetailPage from './pages/ProductDetailPage'
+import TermsPage from './pages/TermsPage'
+import PrivacyPage from './pages/PrivacyPage'
+import ShippingPolicyPage from './pages/ShippingPolicyPage'
 
 export default function App() {
   return (
@@ -48,8 +52,12 @@ export default function App() {
           <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
           <Route path="/checkout/fail" element={<CheckoutFailPage />} />
           <Route path="/admin/products" element={<AdminProductsPage />} />
+          <Route path="/admin/planning" element={<AdminPlanningPage />} />
           <Route path="/admin/settings" element={<AdminSettingsPage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/shipping" element={<ShippingPolicyPage />} />
         </Routes>
       </main>
       <Footer />
