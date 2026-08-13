@@ -22,9 +22,9 @@ export default function Footer() {
             </div>
             <div className="footer-col">
               <h4>쇼핑 정보</h4>
-              <a href="#">이용약관</a>
-              <a href="#">개인정보처리방침</a>
-              <a href="#">배송·교환·환불</a>
+              <Link to="/terms">이용약관</Link>
+              <Link to="/privacy">개인정보처리방침</Link>
+              <Link to="/shipping">배송·교환·환불</Link>
             </div>
             <div className="footer-col">
               <h4>회사 정보</h4>
