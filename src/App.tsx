@@ -22,6 +22,7 @@ import NotificationsPage from './pages/NotificationsPage'
 import AdminProductsPage from './pages/AdminProductsPage'
 import AdminSettingsPage from './pages/AdminSettingsPage'
 import AdminPlanningPage from './pages/AdminPlanningPage'
+import AdminDiaryPage from './pages/AdminDiaryPage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import TermsPage from './pages/TermsPage'
 import PrivacyPage from './pages/PrivacyPage'
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="/checkout/fail" element={<CheckoutFailPage />} />
           <Route path="/admin/products" element={<AdminProductsPage />} />
           <Route path="/admin/planning" element={<AdminPlanningPage />} />
+          <Route path="/admin/diary" element={<AdminDiaryPage />} />
           <Route path="/admin/settings" element={<AdminSettingsPage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path="/terms" element={<TermsPage />} />

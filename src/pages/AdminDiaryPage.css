@@ -1,0 +1,114 @@
+/* 셀러 다이어리 — 하루 한 장 */
+.diary{
+  --line:#E3DFD6; --mute:#8C877B; --ink:#1B1A16; --paper:#FFFDF8;
+  --gold:#B08A3E; --green:#4A7C59; --amber:#A66A00; --red:#B3261E;
+  padding-bottom:96px;
+}
+.diary .icon{width:15px;height:15px;fill:currentColor;flex-shrink:0}
+
+.dy-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;
+  padding:30px 0 20px}
+.dy-head h1{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.dy-head p{margin-top:7px;font-size:13px;color:var(--mute);line-height:1.65;max-width:640px}
+
+/* 위 요약 */
+.dy-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);margin-bottom:26px}
+.dy-stats div{background:var(--paper);padding:14px 16px;text-align:center}
+.dy-stats b{display:block;font-size:20px;font-weight:800;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums}
+.dy-stats span{display:block;font-size:11px;color:var(--mute);margin-top:3px}
+
+.dy-body{display:grid;grid-template-columns:212px 1fr;gap:28px;align-items:start}
+
+/* 왼쪽 날짜 목록 */
+.dy-side{position:sticky;top:16px;display:flex;flex-direction:column;gap:10px;
+  max-height:calc(100vh - 60px)}
+.dy-filter{background:0;border:1px solid var(--line);cursor:pointer;padding:7px 10px;
+  font-size:12px;color:var(--mute);font-family:inherit;text-align:left}
+.dy-filter.on{border-color:var(--gold);color:var(--gold);font-weight:700;background:#FFFBF0}
+.dy-list{overflow-y:auto;flex:1;margin:0 -8px}
+.dy-empty{padding:18px 8px;font-size:13px;color:var(--mute)}
+.dy-row{display:block;width:100%;text-align:left;background:0;border:0;cursor:pointer;
+  padding:9px 8px;border-left:3px solid transparent}
+.dy-row:hover{background:#F4F2ED}
+.dy-row.on{background:var(--paper);border-left-color:var(--gold);box-shadow:0 1px 5px rgba(0,0,0,.06)}
+.dy-row-t{display:flex;align-items:center;gap:5px}
+.dy-row-t b{font-size:13.5px;font-weight:700}
+.dy-row-t .star{font-style:normal;font-size:10px}
+.dy-row-t em{font-style:normal;font-size:12px;margin-left:auto}
+.dy-row-s{display:block;font-size:11px;color:var(--mute);margin-top:2px}
+
+/* 오른쪽 */
+.dy-main{min-width:0;background:var(--paper);border:1px solid var(--line);padding:26px 30px 34px}
+.dy-title{display:flex;align-items:center;gap:10px;padding-bottom:16px;border-bottom:2px solid var(--line)}
+.dy-title .icon{width:19px;height:19px;color:var(--gold)}
+.dy-title h2{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.dy-date{font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
+.dy-star{margin-left:auto;background:0;border:1px solid var(--line);cursor:pointer;
+  font-size:14px;padding:5px 11px;filter:grayscale(1);opacity:.45;line-height:1}
+.dy-star.on{filter:none;opacity:1;border-color:var(--gold);background:#FFFBF0}
+
+.dy-mood{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0 4px}
+.dy-mood button{background:0;border:1px solid var(--line);cursor:pointer;padding:6px 11px;
+  font-size:12.5px;font-family:inherit;color:var(--mute)}
+.dy-mood button.on{border-color:var(--gold);background:#FFFBF0;color:var(--ink);font-weight:700}
+
+.dy-sec{display:flex;align-items:center;gap:7px;margin:30px 0 13px;font-size:12px;
+  letter-spacing:.1em;font-weight:800;color:var(--mute);
+  padding-bottom:8px;border-bottom:1px solid var(--line)}
+
+/* 숫자 칸 */
+.dy-nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:12px}
+.dy-nums label{display:flex;flex-direction:column;gap:4px;position:relative}
+.dy-nums span{font-size:11.5px;color:var(--mute)}
+.dy-nums input{border:0;border-bottom:1px solid var(--line);background:0;outline:0;
+  padding:5px 22px 6px 0;font-size:17px;font-weight:700;text-align:right;
+  font-variant-numeric:tabular-nums;font-family:inherit;color:inherit;width:100%}
+.dy-nums input:focus{border-bottom-color:var(--gold)}
+.dy-nums i{position:absolute;right:0;bottom:8px;font-style:normal;font-size:11.5px;color:var(--mute)}
+.dy-why{margin-top:12px;padding:11px 14px;background:#F4F2ED;font-size:12px;
+  color:#6B665A;line-height:1.65}
+.dy-why b{color:var(--ink)}
+
+.dy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px 22px}
+.dy-f{display:flex;flex-direction:column;gap:5px}
+.dy-f span{font-size:11.5px;color:var(--mute)}
+.dy-f input{border:0;border-bottom:1px solid var(--line);background:0;outline:0;
+  padding:5px 0 6px;font-size:14px;font-family:inherit;color:inherit;width:100%}
+.dy-f input:focus{border-bottom-color:var(--gold)}
+
+/* 적는 칸 */
+.dy-note{margin-bottom:20px}
+.dy-note-h{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;margin-bottom:7px}
+.dy-note-h .icon{color:var(--gold)}
+.dy-note-h em{font-style:normal;font-weight:400;font-size:11.5px;color:#B0AA9C;
+  margin-left:2px;line-height:1.4}
+.dy-note textarea{width:100%;border:1px solid var(--line);background:#fff;outline:0;
+  padding:11px 13px;font-size:13.5px;line-height:1.75;resize:none;overflow:hidden;
+  font-family:inherit;color:inherit}
+.dy-note textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(176,138,62,.12)}
+.dy-note.big textarea{font-size:14.5px}
+
+/* 저장 바 */
+.dy-bar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);
+  backdrop-filter:blur(8px);border-top:1px solid var(--line);z-index:20;
+  padding:12px max(20px,calc((100vw - 1200px) / 2));display:flex;align-items:center;gap:14px;
+  font-size:12.5px;color:var(--mute)}
+.dy-bar .sp{flex:1}
+.dy-bar .dirty{color:var(--amber);font-weight:700}
+.dy-notice{color:var(--green);font-weight:600}
+.dy-ghost{background:0;border:1px solid var(--line);cursor:pointer;color:var(--mute);
+  padding:8px 15px;font-size:12.5px;font-family:inherit;border-radius:6px}
+.dy-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.dy-ghost.danger:hover{border-color:var(--red);color:var(--red)}
+
+@media(max-width:900px){
+  .dy-body{grid-template-columns:1fr;gap:16px}
+  .dy-side{position:static;max-height:none}
+  .dy-list{max-height:200px}
+  .dy-stats{grid-template-columns:repeat(2,1fr)}
+  .dy-main{padding:20px 16px 28px}
+  .dy-head{flex-direction:column;align-items:stretch}
+  .dy-bar{padding:10px 16px}
+}

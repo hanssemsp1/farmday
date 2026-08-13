@@ -69,6 +69,9 @@ export default function Header() {
               <Link to="/admin/planning" className="btn btn-sm btn-outline">
                 상품 기획
               </Link>
+              <Link to="/admin/diary" className="btn btn-sm btn-outline">
+                다이어리
+              </Link>
               <Link to="/admin/settings" className="btn btn-sm btn-outline">
                 사이트 설정
               </Link>
