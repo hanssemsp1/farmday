@@ -52,6 +52,7 @@ function fromDb(r: DbPlan): ProductPlan {
       badge: c.badge ?? '',
       thumbs: c.thumbs ?? {},
       details: c.details ?? {},
+      extras: c.extras ?? [],
       notes: c.notes ?? [],
     },
     reviews: r.reviews ?? [],

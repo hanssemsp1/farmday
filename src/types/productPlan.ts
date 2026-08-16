@@ -35,6 +35,11 @@ export interface PlanCoupangOptionRow {
   end: string
 }
 
+export interface PlanExtraDetail {
+  role: string   // 무엇을 담는 장인지 (예: 선물포장 안내)
+  text: string
+}
+
 export interface PlanReview {
   stars: number
   text: string
@@ -62,6 +67,8 @@ export interface ProductPlan {
   content: {
     thumbs: Record<string, PlanThumb>
     details: Record<string, string>
+    // 정해진 11장 말고 더 넣고 싶은 것 (12번부터 이어진다)
+    extras: PlanExtraDetail[]
     badge: string
     notes: string[]
   }
@@ -83,7 +90,7 @@ export function emptyPlan(id: string, category = ''): ProductPlan {
     coupang: { name: '', category: '', searchFilter: '', tags: [], registerId: '', optionRows: [] },
     options: [],
     competitors: { weights: [], rows: [1, 2, 3, 4, 5].map((rank) => ({ rank, prices: {}, title: '' })) },
-    content: { thumbs, details, badge: '', notes: [] },
+    content: { thumbs, details, extras: [], badge: '', notes: [] },
     reviews: [], assets: { folder: '', preview: '' },
   }
 }

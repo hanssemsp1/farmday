@@ -494,6 +494,32 @@ function PlanSheet({ plan, edit }: { plan: ProductPlan; edit: (fn: (d: ProductPl
               </td>
             </tr>
           ))}
+          {/* 정해진 11장 말고 더 넣고 싶은 것 */}
+          {(plan.content.extras || []).map((x, i) => (
+            <tr key={`x${i}`}>
+              <th className="rowhead">
+                <Icon name="doc" />상세페이지{DETAIL_SLOTS.length + i + 1}
+                <button className="rmx" title="이 장 지우기"
+                  onClick={() => edit((d) => { d.content.extras.splice(i, 1) })}>×</button>
+              </th>
+              <td className="sub">
+                <input className="rolein" value={x.role} placeholder="무슨 내용인지"
+                  onChange={(e) => edit((d) => { d.content.extras[i].role = e.target.value })} />
+              </td>
+              <td className="fill">
+                <Auto value={x.text} onChange={(v) => edit((d) => { d.content.extras[i].text = v })} />
+              </td>
+            </tr>
+          ))}
+          <tr>
+            <th className="rowhead addrow" colSpan={3}>
+              <button onClick={() => edit((d) => {
+                d.content.extras = d.content.extras || []
+                d.content.extras.push({ role: '', text: '' })
+              })}>＋ 상세페이지 추가</button>
+            </th>
+          </tr>
+
           <tr>
             <th className="rowhead"><Icon name="folder" />사진 폴더</th>
             <td className="sub">저장 위치</td>
