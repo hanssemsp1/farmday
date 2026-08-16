@@ -217,3 +217,12 @@
 /* 자동 저장 상태 */
 .plan-bar .saving{color:var(--mute)}
 .plan-bar .saved{color:var(--green);font-weight:600}
+
+/* 정해진 장 사이에 끼워 넣기 */
+.xl.detail .addhere{position:absolute;top:50%;right:7px;transform:translateY(-50%);
+  background:0;border:0;cursor:pointer;color:rgba(255,255,255,.4);font-size:13px;
+  padding:0 3px;line-height:1;opacity:0;transition:opacity .12s;font-family:inherit}
+.xl.detail tr:hover .addhere{opacity:1}
+.xl.detail .addhere:hover{color:#fff}
+/* 더 넣은 장은 살짝 구분되게 */
+.xl.detail tr.added .rowhead{background:#33507F}

@@ -36,8 +36,9 @@ export interface PlanCoupangOptionRow {
 }
 
 export interface PlanExtraDetail {
-  role: string   // 무엇을 담는 장인지 (예: 선물포장 안내)
+  role: string    // 무엇을 담는 장인지 (예: 포장·배송 안내)
   text: string
+  after?: number  // 정해진 11장 중 몇 번 뒤에 오는지 (없으면 맨 뒤)
 }
 
 export interface PlanReview {

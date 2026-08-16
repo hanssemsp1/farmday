@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { isAdmin } from '../lib/adminConfig'
 import { fetchPlans, savePlan, deletePlan } from '../lib/productPlans'
 import {
-  ProductPlan, PlanOption, PLAN_CATEGORIES, THUMB_SLOTS, DETAIL_SLOTS,
+  ProductPlan, PlanOption, PlanExtraDetail, PLAN_CATEGORIES, THUMB_SLOTS, DETAIL_SLOTS,
   DISCOUNTS, emptyPlan, netOf, listPriceOf, doneCount,
 } from '../types/productPlan'
 import Button from '../components/ui/Button'
@@ -249,6 +249,24 @@ function PlanSheet({ plan, edit }: { plan: ProductPlan; edit: (fn: (d: ProductPl
     const v = plan.competitors.rows.map((r) => r.prices?.[w]).filter((x): x is number => Number(x) > 0)
     return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : null
   }
+  // 상세페이지 차례 — 정해진 11장 사이사이에 더 넣은 장을 끼워 넣는다.
+  // (예: 구매 전 안내 뒤, 반품·교환 안내 앞에 포장·배송 안내)
+  type DetailRow =
+    | { kind: 'fixed'; slot: typeof DETAIL_SLOTS[number] }
+    | { kind: 'extra'; extra: PlanExtraDetail; idx: number }
+  const extras = plan.content.extras || []
+  const detailRows: DetailRow[] = []
+  DETAIL_SLOTS.forEach((slot) => {
+    detailRows.push({ kind: 'fixed', slot })
+    extras.forEach((extra, idx) => {
+      if (extra.after === slot.no) detailRows.push({ kind: 'extra', extra, idx })
+    })
+  })
+  // 자리를 안 정한 것은 맨 뒤에
+  extras.forEach((extra, idx) => {
+    if (!DETAIL_SLOTS.some((s) => s.no === extra.after)) detailRows.push({ kind: 'extra', extra, idx })
+  })
+
   const bad = plan.options.filter((o) => { const n = netOf(o); return n !== null && n < 0 })
   const thin = plan.options.filter((o) => { const n = netOf(o); return n !== null && n >= 0 && o.price && n < o.price * 0.05 })
 
@@ -480,34 +498,37 @@ function PlanSheet({ plan, edit }: { plan: ProductPlan; edit: (fn: (d: ProductPl
       <div className="xl-head"><Icon name="doc" />상세페이지</div>
       <table className="xl detail">
         <tbody>
-          {DETAIL_SLOTS.map((d) => (
-            <tr key={d.no} className={d.base ? 'base' : ''}>
+          {detailRows.map((r, order) => r.kind === 'fixed' ? (
+            <tr key={`f${r.slot.no}`} className={r.slot.base ? 'base' : ''}>
               <th className="rowhead">
-                <Icon name={DETAIL_ICON[d.no]} />상세페이지{d.no}
+                <Icon name={DETAIL_ICON[r.slot.no]} />상세페이지{order + 1}
+                <button className="addhere" title="이 아래에 한 장 넣기"
+                  onClick={() => edit((d) => {
+                    d.content.extras = d.content.extras || []
+                    d.content.extras.push({ role: '', text: '', after: r.slot.no })
+                  })}>＋</button>
               </th>
-              <td className="sub">{d.role}</td>
+              <td className="sub">{r.slot.role}</td>
               <td className="fill">
-                {d.base
+                {r.slot.base
                   ? <span className="basemark">기본 템플릿</span>
-                  : <Auto value={plan.content.details[d.no] || ''}
-                    onChange={(v) => edit((dr) => { dr.content.details[d.no] = v })} />}
+                  : <Auto value={plan.content.details[r.slot.no] || ''}
+                    onChange={(v) => edit((dr) => { dr.content.details[r.slot.no] = v })} />}
               </td>
             </tr>
-          ))}
-          {/* 정해진 11장 말고 더 넣고 싶은 것 */}
-          {(plan.content.extras || []).map((x, i) => (
-            <tr key={`x${i}`}>
+          ) : (
+            <tr key={`x${r.idx}`} className="added">
               <th className="rowhead">
-                <Icon name="doc" />상세페이지{DETAIL_SLOTS.length + i + 1}
+                <Icon name="doc" />상세페이지{order + 1}
                 <button className="rmx" title="이 장 지우기"
-                  onClick={() => edit((d) => { d.content.extras.splice(i, 1) })}>×</button>
+                  onClick={() => edit((d) => { d.content.extras.splice(r.idx, 1) })}>×</button>
               </th>
               <td className="sub">
-                <input className="rolein" value={x.role} placeholder="무슨 내용인지"
-                  onChange={(e) => edit((d) => { d.content.extras[i].role = e.target.value })} />
+                <input className="rolein" value={r.extra.role} placeholder="무슨 내용인지"
+                  onChange={(e) => edit((d) => { d.content.extras[r.idx].role = e.target.value })} />
               </td>
               <td className="fill">
-                <Auto value={x.text} onChange={(v) => edit((d) => { d.content.extras[i].text = v })} />
+                <Auto value={r.extra.text} onChange={(v) => edit((d) => { d.content.extras[r.idx].text = v })} />
               </td>
             </tr>
           ))}
@@ -516,7 +537,7 @@ function PlanSheet({ plan, edit }: { plan: ProductPlan; edit: (fn: (d: ProductPl
               <button onClick={() => edit((d) => {
                 d.content.extras = d.content.extras || []
                 d.content.extras.push({ role: '', text: '' })
-              })}>＋ 상세페이지 추가</button>
+              })}>＋ 맨 뒤에 한 장 더</button>
             </th>
           </tr>
 
