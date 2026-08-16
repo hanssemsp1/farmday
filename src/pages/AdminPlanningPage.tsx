@@ -221,7 +221,7 @@ function PlanSheet({ plan, edit }: { plan: ProductPlan; edit: (fn: (d: ProductPl
   const couponFor = (o: PlanOption) => {
     const key = (o.weight || '').replace(/\s/g, '').toLowerCase()
     if (!key) return 0
-    const row = plan.coupang.optionRows.find((r) => (r.option || '').replace(/\s/g, '').toLowerCase() === key)
+    const row = (plan.coupang?.optionRows || []).find((r) => (r.option || '').replace(/\s/g, '').toLowerCase() === key)
     return row?.couponAmount || 0
   }
 

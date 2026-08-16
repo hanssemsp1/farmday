@@ -22,19 +22,40 @@ interface DbPlan {
   updated_at: string | null
 }
 
+// 예전에 저장된 상품에는 나중에 만든 칸이 없다.
+// 빠진 칸을 여기서 채워두지 않으면 화면 쪽에서 터진다 — 실제로 한 번 겪었다.
 function fromDb(r: DbPlan): ProductPlan {
+  const c = r.content ?? ({} as Partial<ProductPlan['content']>)
+  const cp = r.coupang ?? ({} as Partial<ProductPlan['coupang']>)
   return {
     id: r.id,
     category: r.category ?? '',
     season: r.season ?? [],
     status: r.status ?? '기획',
-    vendor: r.vendor ?? { name: '', note: '' },
-    coupang: r.coupang ?? { name: '', category: '', searchFilter: '', tags: [], registerId: '', optionRows: [] },
+    vendor: { name: '', note: '', ...(r.vendor ?? {}) },
+    coupang: {
+      name: cp.name ?? '',
+      category: cp.category ?? '',
+      searchFilter: cp.searchFilter ?? '',
+      registerId: cp.registerId ?? '',
+      priceMemo: cp.priceMemo,
+      optionIds: cp.optionIds,
+      tags: cp.tags ?? [],
+      optionRows: cp.optionRows ?? [],
+    },
     options: r.options ?? [],
-    competitors: r.competitors ?? { weights: [], rows: [] },
-    content: r.content ?? { thumbs: {}, details: {}, badge: '', notes: [] },
+    competitors: {
+      weights: r.competitors?.weights ?? [],
+      rows: r.competitors?.rows ?? [],
+    },
+    content: {
+      badge: c.badge ?? '',
+      thumbs: c.thumbs ?? {},
+      details: c.details ?? {},
+      notes: c.notes ?? [],
+    },
     reviews: r.reviews ?? [],
-    assets: r.assets ?? { folder: '', preview: '' },
+    assets: { folder: '', preview: '', ...(r.assets ?? {}) },
     updatedAt: r.updated_at ?? undefined,
   }
 }
