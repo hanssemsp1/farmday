@@ -112,3 +112,7 @@
   .dy-head{flex-direction:column;align-items:stretch}
   .dy-bar{padding:10px 16px}
 }
+
+/* 자동 저장 상태 */
+.dy-bar .saving{color:var(--mute)}
+.dy-bar .saved{color:var(--green);font-weight:600}

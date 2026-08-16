@@ -507,7 +507,8 @@
       "mcp__c9424796-7aa9-43a8-b24c-42f116acb926__show_plans_and_credits",
       "Bash(ffmpeg -y -v error -i /c/Users/서현주/OneDrive/Desktop/video.mp4 -vf 'select='\\\\''eq\\(n\\\\,5\\)+eq\\(n\\\\,70\\)+eq\\(n\\\\,140\\)'\\\\'',tile=3x1,scale=1680:-2' -frames:v 1 gv1.png)",
       "Bash(ffmpeg -y -v error -sseof -1.5 -i /c/Users/서현주/OneDrive/Desktop/video.mp4 -frames:v 1 -vf crop=400:200:860:500,scale=800:400 gv_wm.png)",
-      "WebFetch(domain:youtu.be)"
+      "WebFetch(domain:youtu.be)",
+      "Bash(awk '/if \\\\\\(authLoading \\\\|\\\\| !isAdmin/{r=NR} /use\\(State|Effect|Memo|Ref|Callback|LayoutEffect\\)\\\\\\(/{if\\(r&&NR>r\\) print \"  ✗ \"NR\"행: return 뒤에 훅이 있음\"} END{if\\(!f\\) print \"  ✓ 문제 없음\"}' src/pages/AdminPlanningPage.tsx)"
     ]
   }
 }

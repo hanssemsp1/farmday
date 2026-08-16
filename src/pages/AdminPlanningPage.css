@@ -200,3 +200,7 @@
   .xl .sub{width:88px;font-size:11px}
   .xl .catrow{flex-wrap:wrap}
 }
+
+/* 자동 저장 상태 */
+.plan-bar .saving{color:var(--mute)}
+.plan-bar .saved{color:var(--green);font-weight:600}

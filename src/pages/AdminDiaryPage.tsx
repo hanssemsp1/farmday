@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { isAdmin } from '../lib/adminConfig'
@@ -71,6 +71,37 @@ export default function AdminDiaryPage() {
     star: days.filter((d) => d.starred).length,
   }), [days])
 
+  // ── 자동 저장 ──────────────────────────────────
+  // 적다가 창을 닫거나 화면이 죽어도 잃지 않게. 잠깐 멈추면 알아서 저장한다.
+  // ⚠️ 아래 `return null` 보다 위에 있어야 한다 — React는 훅을 건너뛰면 안 된다.
+  const timer = useRef<number | undefined>(undefined)
+  const inFlight = useRef(false)
+
+  const persist = useCallback(async (d: DiaryDay) => {
+    if (inFlight.current) return
+    inFlight.current = true
+    setSaving(true)
+    try {
+      const saved = await saveDay(d)
+      setDays((prev) => [...prev.filter((x) => x.day !== saved.day), saved].sort((a, b) => b.day.localeCompare(a.day)))
+      setCur((c) => (c && c.day === saved.day ? { ...c, updatedAt: saved.updatedAt } : c))
+      setDirty(false); setNotice('')
+    } catch (e) {
+      setNotice('저장 실패: ' + (e as Error).message)
+    } finally {
+      inFlight.current = false
+      setSaving(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!dirty || !cur) return
+    window.clearTimeout(timer.current)
+    const snapshot = cur
+    timer.current = window.setTimeout(() => persist(snapshot), 1200)
+    return () => window.clearTimeout(timer.current)
+  }, [cur, dirty, persist])
+
   if (authLoading || !isAdmin(user)) return null
 
   function set<K extends keyof DiaryDay>(k: K, v: DiaryDay[K]) {
@@ -79,7 +110,9 @@ export default function AdminDiaryPage() {
   }
 
   function openDay(d: DiaryDay) {
-    if (dirty && !window.confirm('저장하지 않은 내용이 있습니다. 그냥 넘어갈까요?')) return
+    // 넘어가기 전에 적던 것을 마저 저장한다
+    window.clearTimeout(timer.current)
+    if (dirty && cur) persist(cur)
     setCur({ ...d }); setDirty(false); setNotice('')
   }
 
@@ -93,18 +126,15 @@ export default function AdminDiaryPage() {
 
   async function handleSave() {
     if (!cur) return
-    setSaving(true)
-    try {
-      const saved = await saveDay(cur)
-      setDays((prev) => [...prev.filter((d) => d.day !== saved.day), saved].sort((a, b) => b.day.localeCompare(a.day)))
-      setCur(saved); setDirty(false); setNotice('저장했습니다.')
-    } catch (e) { setNotice('저장 실패: ' + (e as Error).message) }
-    finally { setSaving(false) }
+    window.clearTimeout(timer.current)
+    await persist(cur)
+    setNotice('저장했습니다.')
   }
 
   async function handleDelete() {
     if (!cur) return
     if (!window.confirm(`${labelOf(cur.day)} 기록을 지울까요?`)) return
+    window.clearTimeout(timer.current)   // 지운 것을 자동 저장이 되살리지 않게
     try {
       await deleteDay(cur.day)
       setDays((prev) => prev.filter((d) => d.day !== cur.day))
@@ -250,15 +280,16 @@ export default function AdminDiaryPage() {
       </div>
 
       <div className="dy-bar">
-        <span className={dirty ? 'dirty' : ''}>
-          {dirty ? '저장 안 됨'
-            : cur?.updatedAt ? `마지막 저장 ${new Date(cur.updatedAt).toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' })}` : ''}
+        <span className={saving ? 'saving' : dirty ? 'dirty' : 'saved'}>
+          {saving ? '저장 중…'
+            : dirty ? '곧 저장됩니다'
+              : cur?.updatedAt ? `✓ 저장됨 · ${new Date(cur.updatedAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}` : ''}
         </span>
         {notice && <span className="dy-notice">{notice}</span>}
         <span className="sp" />
         <button className="dy-ghost danger" onClick={handleDelete}>삭제</button>
         <button className="dy-ghost" onClick={download}>전체 내려받기</button>
-        <Button onClick={handleSave} disabled={!dirty || saving}>{saving ? '저장 중…' : '저장'}</Button>
+        <Button onClick={handleSave} disabled={saving}>지금 저장</Button>
       </div>
     </div>
   )

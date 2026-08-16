@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { isAdmin } from '../lib/adminConfig'
@@ -80,6 +80,39 @@ export default function AdminPlanningPage() {
       .sort((a, b) => order(a.category) - order(b.category) || a.id.localeCompare(b.id))
   }, [plans, cat, q])
 
+  // ── 자동 저장 ──────────────────────────────────
+  // 저장 버튼을 눌러야만 저장되던 때, 페이지가 죽으면서 적어둔 게 날아간 적이 있다.
+  // 타이핑이 잠깐 멈추면 알아서 저장한다.
+  // ⚠️ 아래 `return null` 보다 위에 있어야 한다 — React는 훅을 건너뛰면 안 된다.
+  const timer = useRef<number | undefined>(undefined)
+  const inFlight = useRef(false)
+
+  const persist = useCallback(async (plan: ProductPlan) => {
+    if (inFlight.current) return
+    inFlight.current = true
+    setSaving(true)
+    try {
+      const saved = await savePlan(plan)
+      setPlans((prev) => [...prev.filter((p) => p.id !== saved.id), saved].sort((a, b) => a.id.localeCompare(b.id)))
+      setCur((c) => (c && c.id === saved.id ? { ...c, updatedAt: saved.updatedAt } : c))
+      setDirty(false)
+      setNotice('')
+    } catch (e) {
+      setNotice('저장 실패: ' + (e as Error).message)
+    } finally {
+      inFlight.current = false
+      setSaving(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!dirty || !cur) return
+    window.clearTimeout(timer.current)
+    const snapshot = cur
+    timer.current = window.setTimeout(() => persist(snapshot), 1200)
+    return () => window.clearTimeout(timer.current)
+  }, [cur, dirty, persist])
+
   if (authLoading || !isAdmin(user)) return null
 
   function edit(fn: (draft: ProductPlan) => void) {
@@ -93,7 +126,9 @@ export default function AdminPlanningPage() {
   }
 
   function openPlan(p: ProductPlan) {
-    if (dirty && !window.confirm('저장하지 않은 내용이 있습니다. 그냥 넘어갈까요?')) return
+    // 넘어가기 전에 적던 것을 마저 저장한다
+    window.clearTimeout(timer.current)
+    if (dirty && cur) persist(cur)
     setCur(structuredClone(p)); setDirty(false); setNotice('')
   }
 
@@ -106,19 +141,15 @@ export default function AdminPlanningPage() {
 
   async function handleSave() {
     if (!cur) return
-    setSaving(true)
-    try {
-      const saved = await savePlan(cur)
-      setPlans((prev) => [...prev.filter((p) => p.id !== saved.id), saved].sort((a, b) => a.id.localeCompare(b.id)))
-      setCur(saved); setDirty(false); setNotice('저장했습니다.')
-    } catch (e) {
-      setNotice('저장 실패: ' + (e as Error).message)
-    } finally { setSaving(false) }
+    window.clearTimeout(timer.current)
+    await persist(cur)
+    setNotice('저장했습니다.')
   }
 
   async function handleDelete() {
     if (!cur) return
     if (!window.confirm(`「${cur.id}」를 지울까요? 되돌릴 수 없습니다.`)) return
+    window.clearTimeout(timer.current)   // 지운 것을 자동 저장이 되살리지 않게
     try {
       await deletePlan(cur.id)
       setPlans((prev) => prev.filter((p) => p.id !== cur.id))
@@ -192,15 +223,16 @@ export default function AdminPlanningPage() {
 
       {cur && (
         <div className="plan-bar">
-          <span className={dirty ? 'dirty' : ''}>
-            {dirty ? '저장 안 됨'
-              : cur.updatedAt ? `마지막 저장 ${new Date(cur.updatedAt).toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' })}` : ''}
+          <span className={saving ? 'saving' : dirty ? 'dirty' : 'saved'}>
+            {saving ? '저장 중…'
+              : dirty ? '곧 저장됩니다'
+                : cur.updatedAt ? `✓ 저장됨 · ${new Date(cur.updatedAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}` : ''}
           </span>
           {notice && <span className="plan-notice">{notice}</span>}
           <span className="sp" />
           <button className="plan-ghost danger" onClick={handleDelete}>삭제</button>
           <button className="plan-ghost" onClick={download}>제작 요청서 내려받기</button>
-          <Button onClick={handleSave} disabled={!dirty || saving}>{saving ? '저장 중…' : '저장'}</Button>
+          <Button onClick={handleSave} disabled={saving}>지금 저장</Button>
         </div>
       )}
     </div>
