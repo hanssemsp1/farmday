@@ -5,7 +5,7 @@ import { isAdmin } from '../lib/adminConfig'
 import { fetchPlans, savePlan, deletePlan } from '../lib/productPlans'
 import {
   ProductPlan, PlanOption, PLAN_CATEGORIES, THUMB_SLOTS, DETAIL_SLOTS,
-  DISCOUNTS, emptyPlan, netOf, listPriceOf, doneCount,
+  DISCOUNTS, emptyPlan, netOf, netWithCoupon, listPriceOf, doneCount,
 } from '../types/productPlan'
 import Button from '../components/ui/Button'
 import Icon from '../components/ui/Icon'
@@ -217,6 +217,14 @@ function PlanSheet({ plan, edit }: { plan: ProductPlan; edit: (fn: (d: ProductPl
     const v = plan.competitors.rows.map((r) => r.prices?.[w]).filter((x): x is number => Number(x) > 0)
     return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : null
   }
+  // 이 옵션에 걸린 쿠폰 금액 — 옵션ID 표의 중량과 짝을 맞춘다
+  const couponFor = (o: PlanOption) => {
+    const key = (o.weight || '').replace(/\s/g, '').toLowerCase()
+    if (!key) return 0
+    const row = plan.coupang.optionRows.find((r) => (r.option || '').replace(/\s/g, '').toLowerCase() === key)
+    return row?.couponAmount || 0
+  }
+
   const bad = plan.options.filter((o) => { const n = netOf(o); return n !== null && n < 0 })
   const thin = plan.options.filter((o) => { const n = netOf(o); return n !== null && n >= 0 && o.price && n < o.price * 0.05 })
 
@@ -403,6 +411,7 @@ function PlanSheet({ plan, edit }: { plan: ProductPlan; edit: (fn: (d: ProductPl
           <tbody>
             {plan.options.map((o, i) => {
               const n = netOf(o)
+              const cn = netWithCoupon(o, couponFor(o))
               const pct = n !== null && n >= 0 && o.price ? (n / o.price * 100).toFixed(1) + '%' : '—'
               const cls = n !== null && n < 0 ? 'bad' : (n !== null && o.price && n < o.price * 0.05 ? 'thin' : '')
               const set = (k: keyof PlanOption, v: unknown) => edit((d) => { (d.options[i] as never)[k] = v as never })
@@ -416,7 +425,11 @@ function PlanSheet({ plan, edit }: { plan: ProductPlan; edit: (fn: (d: ProductPl
                     onChange={(e) => { const v = numOf(e.target.value); set('fee', v === null ? 0.12 : (v > 1 ? v / 100 : v)) }} /></td>
                   <td><input value={won(o.shipping)} onChange={(e) => set('shipping', numOf(e.target.value) ?? 0)} /></td>
                   <td className="auto">{pct}</td>
-                  <td className={`auto net ${cls}`}>{n === null ? '—' : won(n)}</td>
+                  <td className={`auto net ${cls}`}>
+                    {n === null ? '—' : won(n)}
+                    {/* 쿠폰을 붙이면 실제로 얼마가 남는지 옆에 작게 */}
+                    {cn !== null && <i className={`cnet ${cn < 0 ? 'bad' : ''}`}>쿠폰 {won(cn)}</i>}
+                  </td>
                   {/* 할인율은 그때그때 다르다 — 42%, 45% 처럼 직접 넣으신다 */}
                   <td>
                     <input value={pctText(o.discount)} placeholder="40%" list="discount-list"

@@ -123,6 +123,14 @@ export function netOf(o: PlanOption): number | null {
   return Math.round(o.price * (1 - (o.fee ?? 0.12)) - o.cost - (o.shipping || 0))
 }
 
+// 쿠폰을 붙였을 때 실제로 남는 돈.
+// 쿠폰은 우리가 부담하므로 할인된 금액에 수수료가 매겨진다.
+export function netWithCoupon(o: PlanOption, coupon: number): number | null {
+  if (o.cost == null || !o.price || !coupon) return null
+  const paid = Math.max(0, o.price - coupon)
+  return Math.round(paid * (1 - (o.fee ?? 0.12)) - o.cost - (o.shipping || 0))
+}
+
 // 정상가 = 판매가 ÷ (1 − 할인율), 100원 단위
 export function listPriceOf(o: PlanOption): number | null {
   if (o.price && o.discount) return Math.round(o.price / (1 - o.discount) / 100) * 100
