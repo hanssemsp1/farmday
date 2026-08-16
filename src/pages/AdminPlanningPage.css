@@ -120,9 +120,6 @@
 .xl.grid td.auto{background:var(--auto);color:#7A6A3A;padding:7px 9px;
   font-variant-numeric:tabular-nums;font-weight:600}
 .xl.grid td.net{font-weight:800}
-/* 쿠폰까지 뺐을 때 남는 돈 — 참고용이라 작게 */
-.cnet{display:block;font-style:normal;font-size:10.5px;font-weight:600;color:var(--mute);margin-top:1px}
-.cnet.bad{color:var(--red)}
 .xl.grid td.net.bad{color:var(--red)}
 .xl.grid td.net.thin{color:var(--amber)}
 .xl.grid tr.bad td:not(.auto){background:#FCF1F0}
