@@ -6,6 +6,29 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 5173
+    },
+    {
+      "name": "seller-tool",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "../seller-tool", "run", "dev", "--", "--port", "5174", "--strictPort"],
+      "port": 5174
+    },
+    {
+      "name": "hansem-dashboard",
+      "url": "http://localhost:7788",
+      "port": 7788
+    },
+    {
+      "name": "hansem-jageum",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "../hansem-jageum", "run", "dev", "--", "--port", "5175", "--strictPort"],
+      "port": 5175
+    },
+    {
+      "name": "farmday-manager",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["../farmday-studio/manager/server.mjs"],
+      "port": 5180
     }
   ]
 }

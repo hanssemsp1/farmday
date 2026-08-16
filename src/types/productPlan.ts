@@ -113,7 +113,9 @@ export const DETAIL_SLOTS = [
   { no: 11, role: '카카오채널 안내', base: true, hint: '' },
 ] as const
 
-export const DISCOUNTS = [0.5, 0.4, 0.35, 0.3]
+// 자주 쓰는 할인율 — 고정값이 아니라 빠르게 고르라고 두는 것.
+// 42%·45%처럼 그때그때 다른 값을 직접 넣으실 수 있다.
+export const DISCOUNTS = [0.5, 0.45, 0.42, 0.4, 0.35, 0.3]
 
 // 남는 돈 = 판매가 − 쿠팡수수료 − 공급가 − 택배비
 export function netOf(o: PlanOption): number | null {

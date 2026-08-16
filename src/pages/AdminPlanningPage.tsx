@@ -12,6 +12,9 @@ import Icon from '../components/ui/Icon'
 import './AdminPlanningPage.css'
 
 const won = (n: number | null | undefined) => (n === null || n === undefined ? '' : Number(n).toLocaleString())
+// 0.42 → "42%" (42.5% 처럼 소수도 그대로 보여준다)
+const pctText = (v: number | null | undefined) =>
+  v === null || v === undefined ? '' : `${Number((v * 100).toFixed(1))}%`
 const numOf = (s: string): number | null => {
   const t = s.replace(/[^\d.-]/g, '')
   if (!t.trim()) return null
@@ -226,6 +229,11 @@ function PlanSheet({ plan, edit }: { plan: ProductPlan; edit: (fn: (d: ProductPl
 
   return (
     <div className="sheet" data-cat={plan.category}>
+      {/* 자주 쓰는 할인율 — 칸을 누르면 목록이 뜨지만, 직접 쳐 넣어도 된다 */}
+      <datalist id="discount-list">
+        {DISCOUNTS.map((d) => <option key={d} value={`${d * 100}%`} />)}
+      </datalist>
+
       <div className="sheet-title">
         {plan.category && <Icon name={CAT_ICON[plan.category]} />}
         <h2>{plan.id}</h2>
@@ -406,11 +414,13 @@ function PlanSheet({ plan, edit }: { plan: ProductPlan; edit: (fn: (d: ProductPl
                   <td><input value={won(o.shipping)} onChange={(e) => set('shipping', numOf(e.target.value) ?? 0)} /></td>
                   <td className="auto">{pct}</td>
                   <td className={`auto net ${cls}`}>{n === null ? '—' : won(n)}</td>
+                  {/* 할인율은 그때그때 다르다 — 42%, 45% 처럼 직접 넣으신다 */}
                   <td>
-                    <select value={o.discount ?? ''} onChange={(e) => set('discount', e.target.value ? Number(e.target.value) : null)}>
-                      <option value="">—</option>
-                      {DISCOUNTS.map((d) => <option key={d} value={d}>{d * 100}%</option>)}
-                    </select>
+                    <input value={pctText(o.discount)} placeholder="40%" list="discount-list"
+                      onChange={(e) => {
+                        const v = numOf(e.target.value)
+                        set('discount', v === null ? null : (v > 1 ? v / 100 : v))
+                      }} />
                   </td>
                   <td className="auto">{won(listPriceOf(o)) || '—'}</td>
                   <td className="w1"><button className="x" onClick={() => edit((d) => { d.options.splice(i, 1) })}>×</button></td>
