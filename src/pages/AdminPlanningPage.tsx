@@ -533,15 +533,6 @@ function PlanSheet({ plan, edit }: { plan: ProductPlan; edit: (fn: (d: ProductPl
             </tr>
           ))}
           <tr>
-            <th className="rowhead addrow" colSpan={3}>
-              <button onClick={() => edit((d) => {
-                d.content.extras = d.content.extras || []
-                d.content.extras.push({ role: '', text: '' })
-              })}>＋ 맨 뒤에 한 장 더</button>
-            </th>
-          </tr>
-
-          <tr>
             <th className="rowhead"><Icon name="folder" />사진 폴더</th>
             <td className="sub">저장 위치</td>
             <td className="fill"><input value={plan.assets.folder}
