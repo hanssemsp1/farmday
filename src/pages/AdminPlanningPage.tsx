@@ -327,8 +327,11 @@ function PlanSheet({ plan, edit }: { plan: ProductPlan; edit: (fn: (d: ProductPl
                 <td><input value={r.exposeId} onChange={(e) => edit((d) => { d.coupang.optionRows[i].exposeId = e.target.value })} /></td>
                 <td><input value={r.couponId} onChange={(e) => edit((d) => { d.coupang.optionRows[i].couponId = e.target.value })} /></td>
                 <td><input value={won(r.couponAmount)} onChange={(e) => edit((d) => { d.coupang.optionRows[i].couponAmount = numOf(e.target.value) })} /></td>
-                <td><input value={r.start} placeholder="2026-08-13" onChange={(e) => edit((d) => { d.coupang.optionRows[i].start = e.target.value })} /></td>
-                <td><input value={r.end} placeholder="2026-08-31" onChange={(e) => edit((d) => { d.coupang.optionRows[i].end = e.target.value })} /></td>
+                {/* 쿠폰 기간은 달력에서 고른다 — 매번 날짜를 치지 않게 */}
+                <td><input className="date" type="date" value={r.start}
+                  onChange={(e) => edit((d) => { d.coupang.optionRows[i].start = e.target.value })} /></td>
+                <td><input className="date" type="date" value={r.end}
+                  onChange={(e) => edit((d) => { d.coupang.optionRows[i].end = e.target.value })} /></td>
                 <td className="w1"><button className="x" onClick={() => edit((d) => { d.coupang.optionRows.splice(i, 1) })}>×</button></td>
               </tr>
             ))}

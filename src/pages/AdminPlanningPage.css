@@ -111,6 +111,11 @@
 .xl.grid input,.xl.grid select{text-align:right;padding:7px 9px}
 .xl.grid td.l input{text-align:left}
 .xl.grid select{text-align:left;cursor:pointer;color:var(--mute)}
+/* 날짜 칸 — 비어 있을 땐 흐리게, 고르면 진하게 */
+.xl.grid input.date{cursor:pointer;text-align:right;font-variant-numeric:tabular-nums}
+.xl.grid input.date:not(:valid),.xl.grid input.date[value=""]{color:#B5AFA2}
+.xl.grid input.date::-webkit-calendar-picker-indicator{opacity:.4;cursor:pointer}
+.xl.grid input.date:hover::-webkit-calendar-picker-indicator{opacity:1}
 .xl.grid td.auto{background:var(--auto);color:#7A6A3A;padding:7px 9px;
   font-variant-numeric:tabular-nums;font-weight:600}
 .xl.grid td.net{font-weight:800}
