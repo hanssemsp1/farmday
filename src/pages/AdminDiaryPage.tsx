@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { isAdmin } from '../lib/adminConfig'
 import { DiaryDay, emptyDay, fetchDiary, saveDay, deleteDay, todayKey, labelOf } from '../lib/sellerDiary'
+import { importSalesExcel, mergeItems } from '../lib/diaryImport'
+import ItemList from '../components/diary/ItemList'
 import Button from '../components/ui/Button'
 import Icon from '../components/ui/Icon'
 import './AdminDiaryPage.css'
@@ -16,6 +18,26 @@ const numOf = (s: string): number | null => {
 }
 
 const MOODS = ['😀 좋음', '🙂 그럭저럭', '😣 힘듦', '😤 답답', '🎉 뿌듯']
+
+// 예전에 한 줄 글로 적던 「올린 상품 / 팔린 상품」을 새 목록 칸으로 옮긴다.
+// 회색 상자로만 보이고 고칠 수 없던 것을, 고칠 수 있는 줄로 바꿔 준다.
+function migrateOld(d: DiaryDay): { d: DiaryDay; changed: boolean } {
+  let changed = false
+  const next = { ...d }
+  if (d.uploaded?.trim() && !(d.registered || []).length) {
+    next.registered = d.uploaded.split(/[,\n·]/).map((s) => s.trim()).filter(Boolean)
+      .map((name) => ({ name, channel: '쿠팡' }))
+    next.uploaded = ''
+    changed = true
+  }
+  if (d.sold?.trim() && !(d.soldItems || []).length) {
+    next.soldItems = d.sold.split(/[,\n·]/).map((s) => s.trim()).filter(Boolean)
+      .map((name) => ({ name, channel: '쿠팡', option: '', qty: 1, amount: null }))
+    next.sold = ''
+    changed = true
+  }
+  return { d: next, changed }
+}
 
 // 전자책에 값진 순서로 놓았다. 위에서부터 채우시면 된다.
 const FIELDS: { key: keyof DiaryDay; icon: 'sparkles' | 'info' | 'shield' | 'chat' | 'star' | 'doc'
@@ -43,6 +65,9 @@ export default function AdminDiaryPage() {
   const [saving, setSaving] = useState(false)
   const [notice, setNotice] = useState('')
   const [onlyStar, setOnlyStar] = useState(false)
+  const [tab, setTab] = useState<'registered' | 'sold'>('registered')
+  const [importing, setImporting] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { if (!authLoading && !isAdmin(user)) navigate('/') }, [authLoading, user, navigate])
 
@@ -53,7 +78,8 @@ export default function AdminDiaryPage() {
         setDays(rows)
         // 들어오면 바로 오늘 자리를 펴둔다 — 적는 데 걸림이 없어야 한다
         const t = todayKey()
-        setCur(rows.find((r) => r.day === t) ?? emptyDay(t))
+        const m = migrateOld(rows.find((r) => r.day === t) ?? emptyDay(t))
+        setCur(m.d); if (m.changed) setDirty(true)
       })
       .catch((e) => setNotice('불러오지 못했습니다: ' + e.message))
       .finally(() => setLoading(false))
@@ -113,7 +139,62 @@ export default function AdminDiaryPage() {
     // 넘어가기 전에 적던 것을 마저 저장한다
     window.clearTimeout(timer.current)
     if (dirty && cur) persist(cur)
-    setCur({ ...d }); setDirty(false); setNotice('')
+    const m = migrateOld(d)
+    setCur(m.d); setDirty(m.changed); setNotice('')
+  }
+
+  // 쿠팡 주문 엑셀을 올리면 주문일별로 「판매된 상품」에 나눠 넣는다.
+  // 한 파일에 여러 날이 섞여 있으니 오늘 칸에 몰아넣지 않는다.
+  // 매출·주문 수는 비어 있는 날만 채운다 — 대표님이 손으로 적은 숫자는 건드리지 않는다.
+  async function importExcel(file: File) {
+    setImporting(true); setNotice('')
+    try {
+      const r = await importSalesExcel(file, '쿠팡')
+      if (r.missing.length) {
+        window.alert(`이 파일에서 ${r.missing.join('·')} 칸을 찾지 못했습니다.\n쿠팡 윙 > 주문/배송 관리에서 내려받은 엑셀인지 확인해 주세요.`)
+        return
+      }
+      if (!r.days.length) { window.alert('넣을 주문이 없습니다.'); return }
+
+      const first = r.days[0].day, last = r.days[r.days.length - 1].day
+      const ok = window.confirm(
+        `${labelOf(first)} ~ ${labelOf(last)} · ${r.days.length}일 · ${r.total - r.noDate}건\n` +
+        (r.noDate ? `(주문일이 없는 ${r.noDate}건은 건너뜁니다)\n` : '') +
+        `\n날짜별로 나눠서 「판매된 상품」에 넣을까요?`)
+      if (!ok) return
+
+      // 적던 것 먼저 저장해 두고 시작한다
+      window.clearTimeout(timer.current)
+      if (dirty && cur) await persist(cur)
+
+      let added = 0, skipped = 0
+      const updated: DiaryDay[] = []
+      for (const imp of r.days) {
+        const base = days.find((d) => d.day === imp.day) ?? (cur?.day === imp.day ? cur : emptyDay(imp.day))
+        const { merged, added: n } = mergeItems(base.soldItems || [], imp.items)
+        added += n; skipped += imp.items.length - n
+        if (!n) continue
+        const next: DiaryDay = {
+          ...base, soldItems: merged,
+          revenue: base.revenue == null ? imp.revenue : base.revenue,
+          orders: base.orders == null ? imp.orders : base.orders,
+        }
+        updated.push(await saveDay(next))
+      }
+      setDays((prev) => {
+        const map = new Map(prev.map((d) => [d.day, d]))
+        updated.forEach((d) => map.set(d.day, d))
+        return [...map.values()].sort((a, b) => b.day.localeCompare(a.day))
+      })
+      const curNext = updated.find((d) => d.day === cur?.day)
+      if (curNext) { setCur(curNext); setDirty(false) }
+      setTab('sold')
+      setNotice(`${added}건 넣었습니다.${skipped ? ` 이미 있던 ${skipped}건은 건너뛰었습니다.` : ''}`)
+    } catch (e) {
+      setNotice('엑셀을 읽지 못했습니다: ' + (e as Error).message)
+    } finally {
+      setImporting(false)
+    }
   }
 
   function newDay() {
@@ -154,7 +235,12 @@ export default function AdminDiaryPage() {
         d.hours !== null && `${d.hours}시간`,
       ].filter(Boolean)
       if (nums.length) bits.push(nums.join(' · '))
+      const reg = (d.registered||[]).filter(x=>x.name).map(x=>x.channel? `${x.name}(${x.channel})` : x.name)
+      if (reg.length) bits.push(`**등록상품** ${reg.join(', ')}`)
       if (d.uploaded) bits.push(`**올린 상품** ${d.uploaded}`)
+      const sld = (d.soldItems||[]).filter(x=>x.name).map(x=>
+        `${x.name}${x.option?' '+x.option:''}${x.qty?' ×'+x.qty:''}${x.amount?' '+won(x.amount)+'원':''}${x.channel?' ('+x.channel+')':''}`)
+      if (sld.length) bits.push(`**판매된 상품** ${sld.join(', ')}`)
       if (d.sold) bits.push(`**팔린 상품** ${d.sold}`)
       FIELDS.forEach((f) => {
         const v = d[f.key] as string
@@ -203,7 +289,10 @@ export default function AdminDiaryPage() {
                   {d.mood && <em>{d.mood.split(' ')[0]}</em>}
                 </span>
                 <span className="dy-row-s">
-                  {[d.revenue !== null && `${won(d.revenue)}원`, d.uploaded, d.struggle && '막힌 것 있음']
+                  {[d.revenue !== null && `${won(d.revenue)}원`,
+                    (d.registered||[]).filter(x=>x.name).length ? `등록 ${(d.registered||[]).filter(x=>x.name).length}` : d.uploaded,
+                    (d.soldItems||[]).filter(x=>x.name).length ? `판매 ${(d.soldItems||[]).filter(x=>x.name).length}` : d.sold,
+                    d.struggle && '막힌 것 있음']
                     .filter(Boolean).join(' · ') || '비어 있음'}
                 </span>
               </button>
@@ -253,16 +342,43 @@ export default function AdminDiaryPage() {
                 겪은 사람만 답할 수 있어요.
               </p>
 
-              {/* 무엇을 했나 */}
+              {/* 무엇을 했나 — 등록 / 판매 두 탭. 상품 이름이 한눈에 읽히게 한 목록이 한 폭을 다 쓴다 */}
               <div className="dy-sec"><Icon name="box" />오늘 한 일</div>
-              <div className="dy-grid">
-                <label className="dy-f"><span>올린 상품</span>
-                  <input value={cur.uploaded} placeholder="예: 돈마호크 (썸네일 5장 완성)"
-                    onChange={(e) => set('uploaded', e.target.value)} /></label>
-                <label className="dy-f"><span>팔린 상품</span>
-                  <input value={cur.sold} placeholder="예: 성주참외 3kg 2건, 무화과 1건"
-                    onChange={(e) => set('sold', e.target.value)} /></label>
+              <div className="dy-tabs">
+                <button className={tab === 'registered' ? 'on' : ''} onClick={() => setTab('registered')}>
+                  등록상품{(cur.registered || []).length > 0 && <em>{(cur.registered || []).length}</em>}
+                </button>
+                <button className={tab === 'sold' ? 'on' : ''} onClick={() => setTab('sold')}>
+                  판매된 상품{(cur.soldItems || []).length > 0 && <em>{(cur.soldItems || []).length}</em>}
+                </button>
+                {tab === 'sold' && (
+                  <span className="dy-tabs-r">
+                    <button className="dy-ghost" disabled={importing} onClick={() => fileRef.current?.click()}>
+                      {importing ? '읽는 중…' : '쿠팡 주문 엑셀 올리기'}
+                    </button>
+                    <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" hidden
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) importExcel(f); e.target.value = '' }} />
+                  </span>
+                )}
               </div>
+
+              {tab === 'registered' ? (
+                <ItemList label="등록상품" mode="registered" items={cur.registered || []}
+                  placeholder="예: 허니듀 메론 선물세트"
+                  onChange={(next) => set('registered', next)} />
+              ) : (
+                <>
+                  <ItemList label="판매된 상품" mode="sold" items={cur.soldItems || []}
+                    placeholder="예: 성주참외"
+                    onChange={(next) => set('soldItems', next)} />
+                  {!(cur.soldItems || []).length && (
+                    <p className="dy-why">
+                      쿠팡 윙 &gt; 주문/배송 관리에서 내려받은 엑셀을 올리면 <b>상품명·옵션·수량·결제액</b>이
+                      주문일별로 들어갑니다. 여러 날이 섞여 있어도 각 날짜에 나눠 넣습니다.
+                    </p>
+                  )}
+                </>
+              )}
 
               {/* 적는 칸 */}
               <div className="dy-sec"><Icon name="sparkles" />오늘의 기록</div>

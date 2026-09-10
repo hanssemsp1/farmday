@@ -6,6 +6,21 @@ import { supabase } from './supabaseClient'
 
 const TABLE = 'seller_diary'
 
+// 하루에 여러 상품을 올리고, 여러 곳에서 팔린다.
+// 그래서 한 줄 글이 아니라 목록으로 담는다.
+export interface DiaryItem {
+  name: string        // 상품 이름
+  channel: string     // 어디에 — 쿠팡 / 네이버 / 당근 / 테무
+  option?: string     // 옵션 (예: 3kg) — 판매된 상품
+  qty?: number | null // 판매된 상품일 때 몇 개
+  amount?: number | null // 구매금액(결제액) — 판매된 상품
+  orderNo?: string    // 엑셀에서 들어온 줄이면 주문번호 — 같은 파일을 다시 올려도 두 번 안 들어가게
+  memo?: string
+}
+
+// 지금 팔거나 팔 곳 넷. 고르기만 하면 되게 목록으로 둔다
+export const CHANNELS = ['쿠팡', '네이버', '당근', '테무'] as const
+
 export interface DiaryDay {
   day: string            // '2026-08-13'
   revenue: number | null
@@ -13,7 +28,9 @@ export interface DiaryDay {
   adCost: number | null
   spent: number | null
   hours: number | null
-  uploaded: string
+  registered: DiaryItem[]  // 등록상품 (예전 이름: 올린 상품)
+  soldItems: DiaryItem[]   // 판매된 상품 (예전 이름: 팔린 상품)
+  uploaded: string         // 예전에 한 줄로 적던 것 — 옛 기록을 위해 남겨둔다
   sold: string
   thoughts: string
   struggle: string
@@ -33,6 +50,8 @@ interface DbDay {
   ad_cost: number | null
   spent: number | null
   hours: number | null
+  registered: unknown[] | null
+  sold_items: unknown[] | null
   uploaded: string | null
   sold: string | null
   thoughts: string | null
@@ -49,6 +68,8 @@ interface DbDay {
 const fromDb = (r: DbDay): DiaryDay => ({
   day: r.day,
   revenue: r.revenue, orders: r.orders, adCost: r.ad_cost, spent: r.spent, hours: r.hours,
+  registered: Array.isArray(r.registered) ? (r.registered as DiaryItem[]) : [],
+  soldItems: Array.isArray(r.sold_items) ? (r.sold_items as DiaryItem[]) : [],
   uploaded: r.uploaded ?? '', sold: r.sold ?? '',
   thoughts: r.thoughts ?? '', struggle: r.struggle ?? '', learned: r.learned ?? '',
   feedback: r.feedback ?? '', tomorrow: r.tomorrow ?? '', etc: r.etc ?? '',
@@ -59,6 +80,7 @@ const fromDb = (r: DbDay): DiaryDay => ({
 const toDb = (d: DiaryDay) => ({
   day: d.day,
   revenue: d.revenue, orders: d.orders, ad_cost: d.adCost, spent: d.spent, hours: d.hours,
+  registered: d.registered ?? [], sold_items: d.soldItems ?? [],
   uploaded: d.uploaded, sold: d.sold,
   thoughts: d.thoughts, struggle: d.struggle, learned: d.learned,
   feedback: d.feedback, tomorrow: d.tomorrow, etc: d.etc,
@@ -68,6 +90,7 @@ const toDb = (d: DiaryDay) => ({
 export function emptyDay(day: string): DiaryDay {
   return {
     day, revenue: null, orders: null, adCost: null, spent: null, hours: null,
+    registered: [], soldItems: [],
     uploaded: '', sold: '', thoughts: '', struggle: '', learned: '',
     feedback: '', tomorrow: '', etc: '', mood: '', starred: false,
   }
