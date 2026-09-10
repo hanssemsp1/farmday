@@ -11,7 +11,7 @@ import './Header.css'
 
 export default function Header() {
   const [query, setQuery] = useState('')
-  const [round, setRound] = useState(false)
+  const [shape, setShape] = useState<'wide' | 'mix' | 'round'>('wide')
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
   const { itemCount } = useCart()
@@ -33,16 +33,22 @@ export default function Header() {
       <div className="container header-inner">
         <Link to="/" className="logo">
           {/* 로고를 올리면 그림으로, 안 올렸으면 지금처럼 글자로.
-              동그란 로고는 가로로 긴 로고와 같은 높이로 두면 너무 작아진다 —
-              모양을 재서 동그란 쪽은 키운다. */}
+              같은 높이로 그리면 모양에 따라 너무 작아진다. 가로세로 비를 재서 셋으로 나눈다.
+                round — 동그란 로고(도장·얼굴)
+                mix   — 그림 + 글자가 한 장에 붙은 로고
+                wide  — 글자만 가로로 긴 로고 */}
           {settings?.logoHeader
             ? <img src={settings.logoHeader} alt={settings.companyName || 'Farmday'}
-              className={`logo-img ${round ? 'logo-round' : ''}`}
-              onLoad={(e) => setRound(e.currentTarget.naturalWidth / e.currentTarget.naturalHeight < 1.7)} />
+              className={`logo-img logo-${shape}`}
+              onLoad={(e) => {
+                const r = e.currentTarget.naturalWidth / e.currentTarget.naturalHeight
+                setShape(r < 1.7 ? 'round' : r < 4.2 ? 'mix' : 'wide')
+              }} />
             : <>Farmday<span className="logo-dot">.</span></>}
-          {/* 동그란 로고만 있으면 사이트 이름이 어디에도 안 보인다.
-              바탕이 어두우니 아래쪽에 쓰는 흰색 가로 로고를 이름 자리에 같이 세운다. */}
-          {round && settings?.logoFooter && (
+          {/* 동그란 로고만 올리면 사이트 이름이 어디에도 안 보인다.
+              바탕이 어두우니 아래쪽에 쓰는 흰색 가로 로고를 이름 자리에 같이 세운다.
+              이름이 이미 들어 있는 로고(mix)에는 붙이지 않는다 — 이름이 두 번 나온다. */}
+          {shape === 'round' && settings?.logoFooter && (
             <img src={settings.logoFooter} alt="" className="logo-word" aria-hidden="true" />
           )}
         </Link>

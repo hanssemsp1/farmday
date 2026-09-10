@@ -5,8 +5,8 @@ import './Footer.css'
 
 export default function Footer() {
   const { settings } = useSiteSettings()
-  // 동그란 로고를 올리면 가로로 긴 로고보다 크게 — 안 그러면 글자가 뭉개진다
-  const [round, setRound] = useState(false)
+  // 로고 모양에 따라 크기를 달리한다 — 헤더와 같은 규칙
+  const [shape, setShape] = useState<'wide' | 'mix' | 'round'>('wide')
 
   return (
     <footer className="footer">
@@ -15,8 +15,11 @@ export default function Footer() {
           <div className="footer-brand">
             <Link to="/" className="logo">{settings?.logoFooter
               ? <img src={settings.logoFooter} alt={settings.companyName || 'Farmday'}
-                className={`logo-img ${round ? 'logo-round' : ''}`}
-                onLoad={(e) => setRound(e.currentTarget.naturalWidth / e.currentTarget.naturalHeight < 1.7)} />
+                className={`logo-img logo-${shape}`}
+                onLoad={(e) => {
+                  const r = e.currentTarget.naturalWidth / e.currentTarget.naturalHeight
+                  setShape(r < 1.7 ? 'round' : r < 4.2 ? 'mix' : 'wide')
+                }} />
               : <>Farmday<span className="logo-dot">.</span></>}</Link>
             <p>{settings?.tagline || '매일이 수확하는 날, 산지직송 신선식품 마켓'}</p>
           </div>

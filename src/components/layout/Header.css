@@ -137,16 +137,23 @@
   .icon-btn-user { display: none; }
 }
 /* 로고를 그림으로 올렸을 때 — 글자 로고와 같은 높이로 맞춘다 */
+/* 헤더는 72px. 로고 모양에 따라 쓸 수 있는 높이가 다르다.
+   글자만 있는 가로 로고를 크게 키우면 글자가 우스꽝스럽게 커지고,
+   그림이 든 로고를 작게 두면 안이 뭉개진다. */
 .logo-img{height:30px;width:auto;display:block;object-fit:contain}
-/* 동그란 로고는 글자가 안에 들어 있어 작으면 뭉개진다. 헤더(72px) 안에서 최대한 키운다 */
-.logo-img.logo-round{height:52px}
+.logo-img.logo-wide{height:30px}
+.logo-img.logo-mix{height:50px}
+.logo-img.logo-round{height:54px}
 /* 동그란 로고 옆에 세우는 이름 */
 .logo-word{height:20px;width:auto;display:block;object-fit:contain}
 .footer .logo-img{height:32px}
+.footer .logo-img.logo-wide{height:32px}
+.footer .logo-img.logo-mix{height:52px}
 .footer .logo-img.logo-round{height:64px}
 @media (max-width: 768px){
-  .logo-img{height:26px}
-  .logo-img.logo-round{height:40px}
+  .logo-img, .logo-img.logo-wide{height:26px}
+  .logo-img.logo-mix{height:38px}
+  .logo-img.logo-round{height:42px}
   .logo-word{height:15px}
   .logo{gap:9px}
 }
