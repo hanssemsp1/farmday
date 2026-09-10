@@ -33,6 +33,7 @@ export interface DiaryDay {
   uploaded: string         // 예전에 한 줄로 적던 것 — 옛 기록을 위해 남겨둔다
   sold: string
   thoughts: string
+  did: string              // 오늘 한 일 — 썸네일 만들기, 상세페이지, 상품 등록 같은 것
   struggle: string
   learned: string
   feedback: string
@@ -55,6 +56,7 @@ interface DbDay {
   uploaded: string | null
   sold: string | null
   thoughts: string | null
+  did: string | null
   struggle: string | null
   learned: string | null
   feedback: string | null
@@ -71,7 +73,7 @@ const fromDb = (r: DbDay): DiaryDay => ({
   registered: Array.isArray(r.registered) ? (r.registered as DiaryItem[]) : [],
   soldItems: Array.isArray(r.sold_items) ? (r.sold_items as DiaryItem[]) : [],
   uploaded: r.uploaded ?? '', sold: r.sold ?? '',
-  thoughts: r.thoughts ?? '', struggle: r.struggle ?? '', learned: r.learned ?? '',
+  thoughts: r.thoughts ?? '', did: r.did ?? '', struggle: r.struggle ?? '', learned: r.learned ?? '',
   feedback: r.feedback ?? '', tomorrow: r.tomorrow ?? '', etc: r.etc ?? '',
   mood: r.mood ?? '', starred: r.starred,
   updatedAt: r.updated_at ?? undefined,
@@ -83,6 +85,9 @@ const toDb = (d: DiaryDay) => ({
   registered: d.registered ?? [], sold_items: d.soldItems ?? [],
   uploaded: d.uploaded, sold: d.sold,
   thoughts: d.thoughts, struggle: d.struggle, learned: d.learned,
+  // 「오늘 한 일」 칸은 나중에 생겼다. 서버에 칸을 아직 안 만들었어도
+  // 비어 있는 동안은 저장이 막히지 않게, 적은 게 있을 때만 보낸다.
+  ...(d.did ? { did: d.did } : {}),
   feedback: d.feedback, tomorrow: d.tomorrow, etc: d.etc,
   mood: d.mood, starred: d.starred,
 })
@@ -91,7 +96,7 @@ export function emptyDay(day: string): DiaryDay {
   return {
     day, revenue: null, orders: null, adCost: null, spent: null, hours: null,
     registered: [], soldItems: [],
-    uploaded: '', sold: '', thoughts: '', struggle: '', learned: '',
+    uploaded: '', sold: '', thoughts: '', did: '', struggle: '', learned: '',
     feedback: '', tomorrow: '', etc: '', mood: '', starred: false,
   }
 }

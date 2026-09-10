@@ -42,10 +42,12 @@ function migrateOld(d: DiaryDay): { d: DiaryDay; changed: boolean } {
 }
 
 // 전자책에 값진 순서로 놓았다. 위에서부터 채우시면 된다.
-const FIELDS: { key: keyof DiaryDay; icon: 'sparkles' | 'info' | 'shield' | 'chat' | 'star' | 'doc'
+const FIELDS: { key: keyof DiaryDay; icon: 'sparkles' | 'info' | 'shield' | 'chat' | 'star' | 'doc' | 'box'
   label: string; hint: string; big?: boolean }[] = [
   { key: 'thoughts', icon: 'sparkles', label: '오늘의 생각', big: true,
     hint: '오늘 어땠는지 — 잘 안 풀린 것, 기뻤던 것, 그냥 든 생각' },
+  { key: 'did', icon: 'box', label: '오늘 한 일',
+    hint: '무엇을 했는지 — 썸네일 만들기, 상세페이지, 상품 등록, 거래처 연락…' },
   { key: 'struggle', icon: 'info', label: '막혔던 것 · 실수',
     hint: '무엇을 몰라서 헤맸는지. 나중에 이게 제일 값진 내용이 됩니다' },
   { key: 'learned', icon: 'shield', label: '배운 것 · 해결법',
@@ -115,7 +117,11 @@ export default function AdminDiaryPage() {
       setCur((c) => (c && c.day === saved.day ? { ...c, updatedAt: saved.updatedAt } : c))
       setDirty(false); setNotice('')
     } catch (e) {
-      setNotice('저장 실패: ' + (e as Error).message)
+      const msg = (e as Error).message
+      // 서버에 「오늘 한 일」 칸을 아직 안 만든 경우 — 무엇을 하면 되는지 바로 알려준다
+      setNotice(/did/.test(msg) && /column|schema/.test(msg)
+        ? '「오늘 한 일」 칸을 쓰려면 서버에 칸을 한 번 만들어야 합니다 (supabase/seller_diary_did.sql)'
+        : '저장 실패: ' + msg)
     } finally {
       inFlight.current = false
       setSaving(false)
@@ -344,8 +350,9 @@ export default function AdminDiaryPage() {
                 겪은 사람만 답할 수 있어요.
               </p>
 
-              {/* 무엇을 했나 — 등록 / 판매 두 탭. 상품 이름이 한눈에 읽히게 한 목록이 한 폭을 다 쓴다 */}
-              <div className="dy-sec"><Icon name="box" />오늘 한 일</div>
+              {/* 등록 / 판매 두 탭. 상품 이름이 한눈에 읽히게 한 목록이 한 폭을 다 쓴다.
+                  「오늘 한 일」은 아래 글 칸 이름으로 쓰므로 여기는 상품 얘기임을 분명히 한다 */}
+              <div className="dy-sec"><Icon name="box" />상품 등록 · 판매</div>
               <div className="dy-tabs">
                 <button className={tab === 'registered' ? 'on' : ''} onClick={() => setTab('registered')}>
                   등록상품{(cur.registered || []).length > 0 && <em>{(cur.registered || []).length}</em>}
