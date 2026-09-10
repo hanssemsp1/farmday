@@ -21,7 +21,11 @@
   z-index: 1;
   max-width: 560px;
   animation: hero-in 0.7s ease;
+  /* 사진이 밝으면 왼쪽을 덮는 그늘만으로는 흰 글씨가 안 읽힌다.
+     글자 자체에 옅은 그림자를 둬서 어떤 사진 위에서도 읽히게 한다. */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55), 0 2px 14px rgba(0, 0, 0, 0.35);
 }
+.hero-banner-inner .hero-cta { text-shadow: none; }
 
 @keyframes hero-in {
   from { opacity: 0; transform: translateY(8px); }

@@ -67,7 +67,7 @@ export default function HeroBanner() {
   // 사진 위에 글씨가 묻히지 않게 왼쪽을 살짝 어둡게 덮는다
   const bgOf = (s: (typeof slides)[number]) =>
     s.image
-      ? { backgroundImage: `linear-gradient(90deg,rgba(0,0,0,.62) 0%,rgba(0,0,0,.30) 55%,rgba(0,0,0,.10) 100%), url(${s.image})`,
+      ? { backgroundImage: `linear-gradient(90deg,rgba(0,0,0,.70) 0%,rgba(0,0,0,.40) 50%,rgba(0,0,0,.12) 100%), url(${s.image})`,
         backgroundSize: 'cover', backgroundPosition: 'center' }
       : { background: s.gradient }
 

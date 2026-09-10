@@ -40,6 +40,11 @@ export default function Header() {
               className={`logo-img ${round ? 'logo-round' : ''}`}
               onLoad={(e) => setRound(e.currentTarget.naturalWidth / e.currentTarget.naturalHeight < 1.7)} />
             : <>Farmday<span className="logo-dot">.</span></>}
+          {/* 동그란 로고만 있으면 사이트 이름이 어디에도 안 보인다.
+              바탕이 어두우니 아래쪽에 쓰는 흰색 가로 로고를 이름 자리에 같이 세운다. */}
+          {round && settings?.logoFooter && (
+            <img src={settings.logoFooter} alt="" className="logo-word" aria-hidden="true" />
+          )}
         </Link>
 
         <form className="search-bar" onSubmit={handleSearch}>
