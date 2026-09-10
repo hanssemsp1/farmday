@@ -1,17 +1,24 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useSiteSettings } from '../../context/SiteSettingsContext'
 import './Footer.css'
 
 export default function Footer() {
   const { settings } = useSiteSettings()
+  // 동그란 로고를 올리면 가로로 긴 로고보다 크게 — 안 그러면 글자가 뭉개진다
+  const [round, setRound] = useState(false)
 
   return (
     <footer className="footer">
       <div className="container footer-inner">
         <div className="footer-top">
           <div className="footer-brand">
-            <Link to="/" className="logo">Farmday<span className="logo-dot">.</span></Link>
-            <p>매일이 수확하는 날, 산지직송 신선식품 마켓</p>
+            <Link to="/" className="logo">{settings?.logoFooter
+              ? <img src={settings.logoFooter} alt={settings.companyName || 'Farmday'}
+                className={`logo-img ${round ? 'logo-round' : ''}`}
+                onLoad={(e) => setRound(e.currentTarget.naturalWidth / e.currentTarget.naturalHeight < 1.7)} />
+              : <>Farmday<span className="logo-dot">.</span></>}</Link>
+            <p>{settings?.tagline || '매일이 수확하는 날, 산지직송 신선식품 마켓'}</p>
           </div>
           <div className="footer-links">
             <div className="footer-col">

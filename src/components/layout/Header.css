@@ -108,3 +108,13 @@
   .search-bar { display: none; }
   .icon-btn-user { display: none; }
 }
+/* 로고를 그림으로 올렸을 때 — 글자 로고와 같은 높이로 맞춘다 */
+.logo-img{height:30px;width:auto;display:block;object-fit:contain}
+/* 동그란 로고는 글자가 안에 들어 있어 작으면 뭉개진다. 헤더(72px) 안에서 최대한 키운다 */
+.logo-img.logo-round{height:56px}
+.footer .logo-img{height:32px}
+.footer .logo-img.logo-round{height:64px}
+@media (max-width: 768px){
+  .logo-img{height:26px}
+  .logo-img.logo-round{height:44px}
+}

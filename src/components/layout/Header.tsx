@@ -5,15 +5,18 @@ import Button from '../ui/Button'
 import { useAuth } from '../../context/AuthContext'
 import { useCart } from '../../context/CartContext'
 import { useFavorites } from '../../context/FavoritesContext'
+import { useSiteSettings } from '../../context/SiteSettingsContext'
 import { isAdmin } from '../../lib/adminConfig'
 import './Header.css'
 
 export default function Header() {
   const [query, setQuery] = useState('')
+  const [round, setRound] = useState(false)
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
   const { itemCount } = useCart()
   const { favoriteIds } = useFavorites()
+  const { settings } = useSiteSettings()
 
   function handleSearch(e: FormEvent) {
     e.preventDefault()
@@ -29,7 +32,14 @@ export default function Header() {
     <header className="header">
       <div className="container header-inner">
         <Link to="/" className="logo">
-          Farmday<span className="logo-dot">.</span>
+          {/* 로고를 올리면 그림으로, 안 올렸으면 지금처럼 글자로.
+              동그란 로고는 가로로 긴 로고와 같은 높이로 두면 너무 작아진다 —
+              모양을 재서 동그란 쪽은 키운다. */}
+          {settings?.logoHeader
+            ? <img src={settings.logoHeader} alt={settings.companyName || 'Farmday'}
+              className={`logo-img ${round ? 'logo-round' : ''}`}
+              onLoad={(e) => setRound(e.currentTarget.naturalWidth / e.currentTarget.naturalHeight < 1.7)} />
+            : <>Farmday<span className="logo-dot">.</span></>}
         </Link>
 
         <form className="search-bar" onSubmit={handleSearch}>
