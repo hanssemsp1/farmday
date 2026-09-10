@@ -67,16 +67,20 @@ export default function ItemList({
         </div>
       ))}
 
-      {sold && items.length > 1 && (
-        <div className="dy-item dy-item-sum">
-          <span>합계 {items.length}줄</span>
-          <span />
-          <span />
-          <span className="r">{items.reduce((a, it) => a + (it.qty || 0), 0)}</span>
-          <span className="r">{items.reduce((a, it) => a + (it.amount || 0), 0).toLocaleString()}</span>
-          <span />
-        </div>
-      )}
+      {/* 합계는 이름이 적힌 줄만 — 빈 줄에 남은 수량이 합계를 부풀리지 않게 */}
+      {sold && items.length > 1 && (() => {
+        const named = items.filter((it) => it.name.trim())
+        return (
+          <div className="dy-item dy-item-sum">
+            <span>합계 {named.length}줄{named.length < items.length && <em> (빈 줄 {items.length - named.length}개 제외)</em>}</span>
+            <span />
+            <span />
+            <span className="r">{named.reduce((a, it) => a + (it.qty || 0), 0)}</span>
+            <span className="r">{named.reduce((a, it) => a + (it.amount || 0), 0).toLocaleString()}</span>
+            <span />
+          </div>
+        )
+      })()}
 
       <button className="dy-item-add" onClick={add}>＋ {label} 추가</button>
     </div>

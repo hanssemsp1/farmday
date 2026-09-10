@@ -135,6 +135,7 @@
 .dy-item-head span{font-size:11.5px;font-weight:700;color:var(--mute);padding:0 4px}
 .dy-item-sum{margin-top:2px;padding-top:8px;border-top:1px dashed var(--line)}
 .dy-item-sum span{font-size:12.5px;font-weight:700;color:#6b6355;padding:0 10px}
+.dy-item-sum em{font-style:normal;font-weight:500;color:#a99b7f}
 .dy-item .r{text-align:right}
 .dy-item input,.dy-item select{border:1px solid #e2ddd2;border-radius:7px;padding:9px 10px;
   font-size:14px;font-family:inherit;background:#fff;outline:0;min-width:0;width:100%;color:inherit}
