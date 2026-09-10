@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { isAdmin } from '../lib/adminConfig'
-import { DiaryDay, emptyDay, fetchDiary, saveDay, deleteDay, todayKey, labelOf } from '../lib/sellerDiary'
+import { DiaryDay, DiaryItem, emptyDay, fetchDiary, saveDay, deleteDay, todayKey, labelOf } from '../lib/sellerDiary'
 import { importSalesExcel, mergeItems } from '../lib/diaryImport'
 import ItemList from '../components/diary/ItemList'
 import Button from '../components/ui/Button'
@@ -24,13 +24,15 @@ const MOODS = ['😀 좋음', '🙂 그럭저럭', '😣 힘듦', '😤 답답',
 function migrateOld(d: DiaryDay): { d: DiaryDay; changed: boolean } {
   let changed = false
   const next = { ...d }
-  if (d.uploaded?.trim() && !(d.registered || []).length) {
+  // 이름이 적힌 줄이 하나도 없을 때만 옮긴다 — 빈 줄만 있는 건 "아직 안 적은 것"이다
+  const named = (list: DiaryItem[] | undefined) => (list || []).filter((x) => x.name?.trim())
+  if (d.uploaded?.trim() && !named(d.registered).length) {
     next.registered = d.uploaded.split(/[,\n·]/).map((s) => s.trim()).filter(Boolean)
       .map((name) => ({ name, channel: '쿠팡' }))
     next.uploaded = ''
     changed = true
   }
-  if (d.sold?.trim() && !(d.soldItems || []).length) {
+  if (d.sold?.trim() && !named(d.soldItems).length) {
     next.soldItems = d.sold.split(/[,\n·]/).map((s) => s.trim()).filter(Boolean)
       .map((name) => ({ name, channel: '쿠팡', option: '', qty: 1, amount: null }))
     next.sold = ''
