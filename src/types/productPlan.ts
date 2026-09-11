@@ -10,13 +10,20 @@ export interface PlanOption {
   label: string
   weight: string
   cost: number | null       // 공급가
-  price: number | null      // 판매가
+  price: number | null      // 판매가(쿠폰적용값) — 정상가 계산에 쓴다
+  realPrice?: number | null // 실제판매가 — 마진율·마진액 계산에 쓴다 (비우면 판매가로 계산)
   listPrice: number | null  // 정상가 (할인율이 있으면 자동 계산)
   discount: number | null   // 0.5 = 50%
   fee: number               // 쿠팡 수수료 (0.12)
   shipping: number          // 택배비 (있는 상품만)
   note: string
   priceAlt?: number | null  // 엑셀에 판매가가 두 개였을 때의 다른 값
+  // 테무 — 내가 올린 값에 테무가 7.5%를 얹어 손님에게 보여준다.
+  temu?: {
+    shipping?: number | null  // 테무 배송비 (비우면 위 택배비를 쓴다)
+    margin?: number | null    // 수익률 0.15 = 15% (판매단가 기준, 쿠팡 마진율과 같은 셈법)
+    price?: number | null     // 판매단가를 직접 정했을 때 (비우면 수익률로 계산)
+  }
 }
 
 export interface PlanCompetitorRow {
@@ -41,10 +48,51 @@ export interface PlanExtraDetail {
   after?: number  // 정해진 11장 중 몇 번 뒤에 오는지 (없으면 맨 뒤)
 }
 
+// 정해진 썸네일 5장 말고 더 넣고 싶은 컷
+export interface PlanExtraThumb {
+  role: string    // 어떤 컷인지 (예: 당도 측정, 크기 비교)
+  hook: string
+  after?: string  // 어느 썸네일 뒤에 오는지 (main / sub1 …, 없으면 맨 뒤)
+}
+
 export interface PlanReview {
   stars: number
   text: string
   pick: string | null
+}
+
+// ── 체험단 ────────────────────────────────────────
+// 두고애드에서 모집하므로 인원은 상품마다 다르다.
+// 명단은 나중에 받으므로, 먼저 "무엇을 써달라고 할지"부터 만들어 둔다.
+export interface CampaignReview {
+  stars: number          // 5점만 몰리면 티가 난다. 4~5점을 섞는다
+  text: string           // 리뷰 문구 — 사람마다 달라야 한다
+  photo: string          // 같이 올릴 사진 (사진1, 사진2 …)
+  option: string         // 어떤 옵션을 산 것으로 할지
+  done?: boolean         // 전달 끝난 줄 표시
+}
+
+// 송장 — 받는 분은 두고애드에서 명단을 받아 채운다
+export interface CampaignRecipient {
+  name: string
+  phone: string
+  phone2?: string
+  address: string
+}
+
+export interface PlanCampaign {
+  option: string         // 기본 옵션 (줄 만들 때 채워 넣는다)
+  count: number          // 이번에 모집한 인원
+  requestDate: string    // 작성요청날짜
+  note: string           // 체험단에게 전할 안내
+  reviews: CampaignReview[]
+  // ── 송장 ──
+  itemName?: string      // 품목명 (비우면 상품 이름을 쓴다)
+  qty?: number           // 내품수량
+  message?: string       // 배송메세지
+  // 보내는 분은 농장·공급처라 매번 같다. 한 번 적어두면 계속 쓴다
+  sender?: { name: string; phone: string; address: string }
+  recipients?: CampaignRecipient[]
 }
 
 export interface ProductPlan {
@@ -70,15 +118,23 @@ export interface ProductPlan {
     details: Record<string, string>
     // 정해진 11장 말고 더 넣고 싶은 것 (12번부터 이어진다)
     extras: PlanExtraDetail[]
+    // 정해진 썸네일 5장 말고 더 넣고 싶은 컷
+    thumbExtras: PlanExtraThumb[]
+    // 칸마다 붙여둔 사진 주소.
+    //   썸네일 고정칸 → 'main' / 'sub1' …,  추가컷 → 'tx0' (thumbExtras 0번)
+    //   상세 고정칸  → 'd2' / 'd3' …,       추가장 → 'ex0' (extras 0번)
+    pics: Record<string, string[]>
     badge: string
     notes: string[]
   }
   reviews: PlanReview[]
+  campaign: PlanCampaign            // 체험단
   assets: { folder: string; preview: string }
   updatedAt?: string
 }
 
-export const PLAN_CATEGORIES = ['야채', '과일', '수산', '축산', '식품'] as const
+// 쇼핑몰 카테고리와 같은 구성으로 맞춘다 (선물세트 포함)
+export const PLAN_CATEGORIES = ['야채', '과일', '수산', '축산', '선물세트', '식품'] as const
 
 export function emptyPlan(id: string, category = ''): ProductPlan {
   const thumbs: Record<string, PlanThumb> = {}
@@ -91,8 +147,10 @@ export function emptyPlan(id: string, category = ''): ProductPlan {
     coupang: { name: '', category: '', searchFilter: '', tags: [], registerId: '', optionRows: [] },
     options: [],
     competitors: { weights: [], rows: [1, 2, 3, 4, 5].map((rank) => ({ rank, prices: {}, title: '' })) },
-    content: { thumbs, details, extras: [], badge: '', notes: [] },
-    reviews: [], assets: { folder: '', preview: '' },
+    content: { thumbs, details, extras: [], thumbExtras: [], pics: {}, badge: '', notes: [] },
+    reviews: [],
+    campaign: { option: '', count: 30, requestDate: '', note: '', reviews: [] },
+    assets: { folder: '', preview: '' },
   }
 }
 
@@ -125,10 +183,48 @@ export const DETAIL_SLOTS = [
 // 42%·45%처럼 그때그때 다른 값을 직접 넣으실 수 있다.
 export const DISCOUNTS = [0.5, 0.45, 0.42, 0.4, 0.35, 0.3]
 
-// 남는 돈 = 판매가 − 쿠팡수수료 − 공급가 − 택배비
+// 마진 계산에 쓰는 판매가 — 실제판매가가 있으면 그걸, 없으면 판매가(쿠폰적용값)를 쓴다
+export function marginPriceOf(o: PlanOption): number | null {
+  return o.realPrice != null ? o.realPrice : (o.price ?? null)
+}
+
+// 남는 돈 = 실제판매가 − 쿠팡수수료 − 공급가 − 택배비
 export function netOf(o: PlanOption): number | null {
-  if (o.cost == null || !o.price) return null
-  return Math.round(o.price * (1 - (o.fee ?? 0.12)) - o.cost - (o.shipping || 0))
+  const base = marginPriceOf(o)
+  if (o.cost == null || !base) return null
+  return Math.round(base * (1 - (o.fee ?? 0.12)) - o.cost - (o.shipping || 0))
+}
+
+// ── 테무 ──────────────────────────────────────
+// 테무는 수수료가 없고, 내가 올린 값에 7.5%를 얹어 손님에게 보여준다.
+export const TEMU_MARKUP = 0.075
+export const TEMU_DEFAULT_MARGIN = 0.15
+
+export function temuShippingOf(o: PlanOption): number {
+  return o.temu?.shipping != null ? o.temu.shipping : (o.shipping || 0)
+}
+
+// 판매단가 = (공급가 + 배송비) ÷ (1 − 수익률), 10원 단위.
+// 수익률은 쿠팡 마진율과 같은 셈법 — 판매단가에서 그만큼이 남는다.
+export function temuPriceOf(o: PlanOption): number | null {
+  if (o.temu?.price) return o.temu.price
+  if (o.cost == null) return null
+  const m = o.temu?.margin ?? TEMU_DEFAULT_MARGIN
+  if (m >= 1) return null
+  return Math.round((o.cost + temuShippingOf(o)) / (1 - m) / 10) * 10
+}
+
+// 손님에게 보이는 값 = 판매단가 × 1.075
+export function temuShownOf(o: PlanOption): number | null {
+  const p = temuPriceOf(o)
+  return p == null ? null : Math.round(p * (1 + TEMU_MARKUP) / 10) * 10
+}
+
+// 남는 돈 = 판매단가 − 공급가 − 배송비 (테무 수수료 0%)
+export function temuNetOf(o: PlanOption): number | null {
+  const p = temuPriceOf(o)
+  if (p == null || o.cost == null) return null
+  return p - o.cost - temuShippingOf(o)
 }
 
 // 정상가 = 판매가 ÷ (1 − 할인율), 100원 단위

@@ -1,11 +1,20 @@
+/* 상품 기획 화면에서는 쇼핑몰용 카테고리줄과 푸터를 감춘다.
+   이 둘이 화면 밖으로 길이를 만들어서 "바깥 스크롤"이 생기고, 그게 좌·우 칸을
+   헤더 뒤로 밀어올렸다. 감추면 화면 높이에 딱 맞아 바깥 스크롤이 사라진다.
+   (overflow:hidden 으로 억지로 잠그면 칸까지 굳어버려서, 이 방법이 안전하다) */
+body.plan-page .category-nav,
+body.plan-page .footer{display:none}
+
 /* 상품 기획 — 대표님 엑셀 표를 그대로 */
 .plan{
   --line:#D9D5CC; --grid:#E7E4DC; --mute:#8C877B; --ink:#1B1A16;
   --head:#1F3864; --headtx:#fff; --sub:#F2F0EA;
   --green:#4A7C59; --red:#B3261E; --amber:#A66A00; --gold:#B08A3E;
   --auto:#FFFBEA;
-  --c-야채:#1E4032; --c-과일:#6E1E2C; --c-수산:#182A4A; --c-축산:#5C2A33; --c-식품:#9C4A2F;
-  padding-bottom:96px;
+  --c-야채:#1E4032; --c-과일:#6E1E2C; --c-수산:#182A4A; --c-축산:#5C2A33; --c-선물세트:#7A5A16; --c-식품:#9C4A2F;
+  /* 분할창 — 화면에 딱 맞춰두고, 왼쪽·오른쪽이 각자 스크롤한다 */
+  display:flex; flex-direction:column;
+  height:calc(100vh - var(--header-height));
 }
 .plan .icon{width:14px;height:14px;fill:currentColor;flex-shrink:0}
 
@@ -14,11 +23,20 @@
 .plan-head h1{font-size:26px;font-weight:800;letter-spacing:-.02em}
 .plan-head p{margin-top:7px;font-size:13px;color:var(--mute);line-height:1.65}
 
-.plan-body{display:grid;grid-template-columns:250px 1fr;gap:30px;align-items:start}
+/* 분할창의 두 칸 — 남는 높이를 다 차지하고, 각자 안에서 스크롤 */
+.plan-body{display:grid;grid-template-columns:250px 1fr;gap:30px;
+  flex:1;min-height:0;align-items:stretch}
 
-/* 왼쪽 목록 */
-.plan-side{position:sticky;top:16px;display:flex;flex-direction:column;gap:12px;
-  max-height:calc(100vh - 60px);padding-top:20px}
+/* 왼쪽 목록 — 커서를 왼쪽에 두면 카테고리·목록이 "여기서만" 스크롤된다.
+   max-height 는 안전장치 — 혹시 바깥 높이 계산이 어긋나도 칸은 반드시 스크롤된다. */
+.plan-side{display:flex;flex-direction:column;gap:12px;
+  height:100%;min-height:0;max-height:calc(100vh - var(--header-height) - 120px);
+  padding:20px 0 70px;
+  overflow-y:auto;overscroll-behavior:contain}
+.plan-side::-webkit-scrollbar{width:8px}
+.plan-side::-webkit-scrollbar-thumb{background:#D9D5CC;border-radius:4px}
+.plan-side::-webkit-scrollbar-thumb:hover{background:#BFB9AC}
+.plan-side::-webkit-scrollbar-track{background:transparent}
 .plan-search{width:100%;border:0;border-bottom:1px solid var(--line);background:0;
   padding:7px 0;font-size:14px;outline:0}
 .plan-search:focus{border-bottom-color:var(--gold)}
@@ -26,7 +44,8 @@
 .plan-cats button{background:0;border:0;cursor:pointer;font-size:12.5px;color:var(--mute);
   padding:2px 0;border-bottom:2px solid transparent;display:inline-flex;align-items:center;gap:4px}
 .plan-cats button.on{color:var(--ink);font-weight:700;border-bottom-color:currentColor}
-.plan-list{overflow-y:auto;flex:1;margin:0 -10px}
+/* 안쪽 스크롤을 없앤다 — 사이드 전체가 하나로 스크롤되게 */
+.plan-list{flex:none;margin:0 -10px}
 .plan-empty{padding:20px 10px;font-size:13px;color:var(--mute)}
 .plan-row{display:block;width:100%;text-align:left;background:0;border:0;cursor:pointer;
   padding:10px;border-left:3px solid transparent}
@@ -36,14 +55,52 @@
 .plan-row[data-cat="과일"].on{border-left-color:var(--c-과일)}
 .plan-row[data-cat="수산"].on{border-left-color:var(--c-수산)}
 .plan-row[data-cat="축산"].on{border-left-color:var(--c-축산)}
+.plan-row[data-cat="선물세트"].on{border-left-color:var(--c-선물세트)}
 .plan-row[data-cat="식품"].on{border-left-color:var(--c-식품)}
 .plan-row-t{display:flex;align-items:center;gap:6px}
 .plan-row-t b{font-size:14px;font-weight:700}
 .plan-row-t em{margin-left:auto;font-size:7px;color:var(--gold);font-style:normal;letter-spacing:1px}
 .plan-row-s{display:block;font-size:11.5px;color:var(--mute);margin-top:3px;padding-left:20px}
+/* 차례 바꾸기 — 늘 보이게 둔다(흐리게), 줄에 마우스를 올리면 또렷해진다.
+   ⚠️ 왼쪽 바깥(-px)에 두면 목록이 스크롤 영역이라 잘려서 안 보인다. 반드시 안쪽에. */
+.plan-row-move{position:absolute;left:13px;top:7px;z-index:2;
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  opacity:.42;transition:opacity .12s}
+.plan-row-wrap:hover .plan-row-move{opacity:1}
+.plan-row-move .mv{width:18px;height:18px;padding:0;border:0;background:0;cursor:pointer;
+  color:#A9A296;font-size:12px;line-height:1;font-family:inherit;border-radius:4px}
+.plan-row-move .mv:hover{color:var(--gold);background:#FFFBEA}
+.plan-row-move .mv.grip{cursor:grab}
+.plan-row-move .mv.grip:active{cursor:grabbing}
+/* 끌고 있는 줄은 흐리게, 놓일 자리는 금색 선으로 알려준다 */
+.plan-row-wrap.dragging{opacity:.4}
+.plan-row-wrap.over{box-shadow:inset 0 2px 0 0 var(--gold)}
+/* 끌 때 글자가 잡히지 않게 */
+.plan-row-wrap.dragging,.plan-row-wrap.dragging *{user-select:none}
+/* 차례 되돌리기 */
+.order-reset{align-self:flex-start;background:0;border:1px solid var(--line);color:var(--mute);
+  border-radius:6px;padding:4px 10px;font-size:11.5px;font-family:inherit;cursor:pointer}
+.order-reset:hover{color:var(--ink);border-color:var(--gold)}
+
+/* 목록에서 바로 지우기 — 평소엔 흐리게, 줄에 마우스를 올리면 또렷하게 */
+.plan-row-wrap{position:relative}
+/* 왼쪽엔 차례 버튼, 오른쪽엔 지우기 버튼 자리를 비워둔다 */
+.plan-row-wrap .plan-row{padding-right:32px;padding-left:34px}
+.plan-row-del{position:absolute;top:8px;right:6px;width:22px;height:22px;padding:0;
+  border:0;background:0;border-radius:6px;cursor:pointer;line-height:1;
+  font-size:16px;color:var(--mute);opacity:.35;transition:opacity .12s,background .12s,color .12s}
+.plan-row-wrap:hover .plan-row-del{opacity:1}
+.plan-row-del:hover{background:#F7E4E1;color:#B3261E}
 
 /* 오른쪽 */
-.plan-main{min-width:0;padding-top:20px}
+/* 오른쪽 기획서 — 커서를 오른쪽에 두면 여기만 스크롤된다.
+   아래 70px은 화면 밑에 붙은 저장바에 글이 가리지 않게 비워둔 자리 */
+.plan-main{min-width:0;height:100%;min-height:0;max-height:calc(100vh - var(--header-height) - 120px);
+  padding:20px 0 70px;
+  overflow-y:auto;overscroll-behavior:contain}
+.plan-side::-webkit-scrollbar,.plan-main::-webkit-scrollbar{width:10px}
+.plan-side::-webkit-scrollbar-thumb,.plan-main::-webkit-scrollbar-thumb{background:#D9D5CC;border-radius:5px}
+.plan-side::-webkit-scrollbar-thumb:hover,.plan-main::-webkit-scrollbar-thumb:hover{background:#BFB9AC}
 .plan-blank{display:grid;place-items:center;gap:14px;text-align:center;padding:80px 20px;color:var(--mute)}
 .plan-blank b{font-size:19px;color:#3E3A31;font-weight:800}
 .plan-blank p{font-size:13.5px;line-height:1.75}
@@ -54,8 +111,14 @@
 .sheet[data-cat="과일"] .sheet-title .icon{color:var(--c-과일)}
 .sheet[data-cat="수산"] .sheet-title .icon{color:var(--c-수산)}
 .sheet[data-cat="축산"] .sheet-title .icon{color:var(--c-축산)}
+.sheet[data-cat="선물세트"] .sheet-title .icon{color:var(--c-선물세트)}
 .sheet[data-cat="식품"] .sheet-title .icon{color:var(--c-식품)}
 .sheet-title h2{font-size:27px;font-weight:800;letter-spacing:-.03em}
+/* 제목 옆 이름 바꾸기 — 평소엔 조용하게, 올리면 또렷하게 */
+.sheet-rename{border:1px solid var(--line);background:#fff;color:var(--mute);
+  border-radius:7px;padding:5px 11px;font-size:12.5px;cursor:pointer;flex-shrink:0;
+  transition:color .12s,border-color .12s,background .12s}
+.sheet-rename:hover{color:var(--ink);border-color:var(--gold);background:#FFFBEA}
 .sheet-done{margin-left:auto;font-size:20px;font-weight:800;color:var(--gold)}
 .sheet-done em{font-size:11.5px;font-style:normal;color:var(--mute);font-weight:600}
 
@@ -85,6 +148,11 @@
 .xl .catrow{display:flex;gap:0}
 .xl .catrow>*{border-right:1px solid var(--grid)}
 .xl .catrow>*:last-child{border-right:0}
+/* 카테고리는 확 줄이고(고정 좁게), 제철은 적당히, 업체칸이 나머지를 다 차지 */
+/* 「선물세트」 네 글자가 잘리지 않을 만큼은 준다 */
+.xl .catrow .catsel{flex:0 0 118px;width:118px;min-width:0}
+.xl .catrow>input:not(.vendorcell){flex:0 0 150px;width:150px;min-width:0}
+.xl .catrow .vendorcell{flex:1 1 auto;min-width:0}
 
 /* 머리글 띠 */
 .xl-head{display:flex;align-items:center;gap:8px;margin:26px 0 0;padding:9px 12px;
@@ -126,16 +194,35 @@
 .xl.grid tr.thin td:not(.auto){background:#FDF9F0}
 .xl .w1{width:34px} .xl .w2{width:64px}
 /* 숫자·중량 칸은 모두 같은 너비, 이름 칸만 남는 폭을 다 쓴다 */
-.xl.grid th:not(.l):not(.w1):not(.w2){width:96px}
+.xl.grid th:not(.l):not(.w1):not(.w2):not(.wopt):not(.wfile){width:96px}
 .xl.grid th.l{width:auto;min-width:230px}
 /* 칸이 좁아도 글이 삐져나오지 않게 */
 .xl.grid td{overflow:hidden;text-overflow:ellipsis}
 .xl.grid td.l input{text-overflow:ellipsis}
-.xl .x{background:0;border:0;cursor:pointer;color:#C6BFB0;font-size:15px;padding:3px 5px;line-height:1}
+.xl .x{background:0;border:0;cursor:pointer;color:#9A9284;font-size:16px;padding:3px 5px;line-height:1;
+  border-radius:5px;transition:color .12s,background .12s}
+.xl .x:hover{color:#B3261E;background:#F7E4E1}
+
+/* 지우기 칸은 오른쪽에 붙여 둔다 —
+   옵션 표는 칸이 많아 가로로 넘치는데, 그냥 두면 ×가 화면 밖으로 밀려 안 보인다. */
+.xl-scroll .xl .w1{position:sticky;right:0;z-index:2;background:#fff;
+  box-shadow:-1px 0 0 var(--grid)}
+.xl-scroll .xl thead .w1{background:var(--sub)}
 .xl .x:hover{color:var(--red)}
 .xl-add{margin:8px 0 0;background:0;border:0;cursor:pointer;color:var(--gold);
   font-size:12.5px;font-weight:700;padding:0}
 .xl-hint{margin:10px 0 0;padding:11px 14px;background:#F4F2ED;font-size:12.5px;color:#6B665A}
+.xl-head-sub{margin-left:10px;font-size:11.5px;font-weight:500;color:#9A9284;letter-spacing:0}
+
+/* 테무 단가표 — 옵션 이름은 위 표에서 가져와 읽기만 한다 */
+.xl.grid.temu td.l.auto{background:0;color:var(--ink);font-weight:600;text-align:left;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xl.grid.temu .dim{color:#9A9284;font-weight:400;font-style:normal}
+.xl.grid.temu td.strong{color:#5A4A1E;font-weight:800;font-size:14px}
+/* 쿠팡 판매가와의 차이 — 맞추라는 뜻이니 눈에 띄게 */
+.xl.grid.temu .diff{display:block;font-size:10.5px;font-weight:700;margin-top:1px}
+.xl.grid.temu .diff.up{color:var(--red)}
+.xl.grid.temu .diff.down{color:var(--green,#4A7C59)}
 
 /* 경쟁판매가 */
 .comp th.w2{background:var(--sub);color:#5E594D;font-size:11.5px;font-weight:700;
@@ -196,13 +283,23 @@
 .plan-notice{color:var(--green);font-weight:600}
 .plan-ghost{background:0;border:1px solid var(--line);cursor:pointer;color:var(--mute);
   padding:8px 15px;font-size:12.5px;font-family:inherit;border-radius:6px}
+/* 되돌리기 — 쓸 수 있을 때만 또렷하게 */
+.plan-ghost.undo{color:var(--ink);border-color:var(--gold)}
+.plan-ghost.undo em{font-style:normal;margin-left:5px;font-size:11px;font-weight:700;
+  color:var(--gold);background:#FFFBEA;border-radius:8px;padding:1px 6px}
+.plan-ghost.undo:disabled{color:#C6C1B6;border-color:var(--line);cursor:default}
+.plan-ghost.undo:disabled em{display:none}
 .plan-ghost:hover{border-color:var(--gold);color:var(--gold)}
 .plan-ghost.danger:hover{border-color:var(--red);color:var(--red)}
 
 @media(max-width:900px){
-  .plan-body{grid-template-columns:1fr;gap:18px}
-  .plan-side{position:static;max-height:none}
-  .plan-list{max-height:230px}
+  /* 좁은 화면에선 분할창을 풀고 위아래로 쌓는다 — 페이지가 통째로 스크롤 */
+  body.plan-page .category-nav{display:flex}
+  .plan{display:block;height:auto;padding-bottom:96px}
+  .plan-body{grid-template-columns:1fr;gap:18px;height:auto;min-height:0}
+  .plan-side{height:auto;min-height:0;max-height:none;overflow:visible;padding:0}
+  .plan-main{height:auto;min-height:0;max-height:none;overflow:visible;padding:0}
+  .plan-list{max-height:230px;overflow-y:auto}
   .plan-head{flex-direction:column;align-items:stretch}
   .plan-bar{padding:10px 16px;flex-wrap:wrap}
   .xl .rowhead{width:96px;font-size:11.5px}
@@ -222,3 +319,73 @@
 .xl.detail .addhere:hover{color:#fff}
 /* 더 넣은 장은 살짝 구분되게 */
 .xl.detail tr.added .rowhead{background:#33507F}
+
+/* 쓴 내용을 위/아래 칸과 맞바꾸기 */
+.movebtns{display:inline-flex;gap:1px;margin-left:6px;vertical-align:-1px}
+.movebtns .mvv{width:16px;height:15px;padding:0;border:0;border-radius:3px;cursor:pointer;
+  background:rgba(255,255,255,.16);color:currentColor;font-size:8px;line-height:1;font-family:inherit;opacity:.75}
+.movebtns .mvv:hover:not(:disabled){background:var(--gold);color:#fff;opacity:1}
+.movebtns .mvv:disabled{opacity:.2;cursor:default}
+/* 썸네일 쪽은 바탕이 밝아서 색을 달리한다 */
+.xl .sub .movebtns .mvv{background:#EFEDE7;color:var(--mute)}
+.xl .sub .movebtns .mvv:hover:not(:disabled){background:var(--gold);color:#fff}
+
+/* 글 칸에 붙는 사진 줄 */
+.picstrip{display:flex;flex-wrap:wrap;gap:6px;align-items:center;
+  padding:6px 10px 9px;border-top:1px dashed var(--grid)}
+.picstrip.over{background:#FFFBEA;box-shadow:inset 0 0 0 2px var(--gold)}
+.picstrip .pic{position:relative;display:inline-flex}
+.picstrip .pic img{width:62px;height:62px;object-fit:cover;border-radius:6px;
+  border:1px solid var(--grid);display:block}
+.picstrip .picx{position:absolute;top:-5px;right:-5px;width:18px;height:18px;padding:0;
+  border:0;border-radius:50%;background:#fff;color:var(--mute);cursor:pointer;
+  font-size:12px;line-height:1;box-shadow:0 1px 4px rgba(0,0,0,.22)}
+.picstrip .picx:hover{background:#B3261E;color:#fff}
+.picstrip .picadd{border:1px dashed var(--line);background:0;color:var(--mute);
+  border-radius:6px;padding:6px 11px;font-size:11.5px;font-family:inherit;cursor:pointer}
+.picstrip .picadd:hover{color:var(--ink);border-color:var(--gold);background:#FFFBEA}
+.picstrip .picadd:disabled{opacity:.5;cursor:default}
+.picstrip .picerr{font-size:11.5px;color:#B3261E}
+
+/* 체험단 */
+.xl .campset{display:flex;align-items:center;gap:10px;padding:0 10px}
+.xl .campset input{width:80px;flex:0 0 80px;text-align:right;padding-left:0}
+.campmake{border:1px solid var(--gold);background:#FFFBEA;color:#7A5A16;border-radius:7px;
+  padding:6px 12px;font-size:12px;font-family:inherit;cursor:pointer;white-space:nowrap}
+.campmake:hover{background:var(--gold);color:#fff}
+.xl .campset .hintx{font-size:11.5px;color:var(--mute)}
+.xl.camp td.no{text-align:center;color:var(--mute);font-size:12px}
+.xl.camp textarea{min-height:44px;line-height:1.55}
+.camp-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.camp-dl{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:7px;
+  padding:8px 14px;font-size:12.5px;font-family:inherit;cursor:pointer}
+.camp-dl:hover{border-color:var(--gold);background:#FFFBEA}
+/* 체험단 표 — 옵션은 좁게, 사진 파일명은 넉넉하게 */
+/* 옵션·파일명은 "쓰는 만큼"만 자리를 차지한다.
+   width:1% + nowrap 은 표에서 칸을 내용 크기로 줄이는 방법이고,
+   field-sizing:content 는 입력칸 자체가 글자 수에 맞춰 늘었다 줄었다 하게 한다. */
+/* 옵션·파일명 열 폭.
+   ⚠️ field-sizing(쓰는 대로 늘어나기)은 표 안에서 쓰면 안 된다 —
+      늘어난 입력칸 크기를 표가 열 폭 계산에 넣지 못해서, 열은 찌그러지고
+      글자만 옆 칸으로 튀어나온다(실제로 그렇게 깨졌다).
+   그래서 열은 "쓰는 글이 대체로 들어가는" 적정 폭으로 정해 둔다. */
+/* 옵션은 '1kg' 정도, 사진은 '리뷰30' 정도만 들어가면 된다.
+   정렬은 이 표의 다른 칸과 같이 오른쪽으로 둔다(왼쪽만 튀면 어색하다). */
+.xl.grid th.wopt, .xl.camp td.wopt{width:84px}
+.xl.grid th.wfile, .xl.camp td.wfile{width:84px}
+.xl.camp td.wopt input, .xl.camp td.wfile select{width:100%}
+/* 리뷰내용이 남는 자리를 모두 가져간다 */
+/* 남는 폭은 리뷰내용이 전부 가져간다 (위 두 열이 내용 크기로 줄어든 뒤 남는 만큼) */
+.xl.camp th.l, .xl.camp td.l{width:auto;min-width:260px}
+
+/* 송장 */
+.ship-paste{margin:6px 0 10px}
+.ship-paste textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;
+  font-size:13px;font-family:inherit;line-height:1.6;resize:vertical;outline:0;background:#fff}
+.ship-paste textarea:focus{border-color:var(--gold);background:#FFFDF5}
+.ship-paste-act{display:flex;align-items:center;gap:10px;margin-top:7px;flex-wrap:wrap}
+.xl.grid th.wname, .xl.ship td.wname{width:96px}
+.xl.grid th.wphone, .xl.ship td.wphone{width:126px}
+.xl.ship td.no{text-align:center;color:var(--mute);font-size:12px}
+.xl.ship th.l, .xl.ship td.l{width:auto;min-width:260px}
+.xl.ship td.l input{text-align:left}
