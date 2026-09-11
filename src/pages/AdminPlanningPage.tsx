@@ -16,9 +16,32 @@ import ShippingSection from '../components/planning/ShippingSection'
 import './AdminPlanningPage.css'
 
 const won = (n: number | null | undefined) => (n === null || n === undefined ? '' : Number(n).toLocaleString())
-// 0.42 → "42%" (42.5% 처럼 소수도 그대로 보여준다)
-const pctText = (v: number | null | undefined) =>
-  v === null || v === undefined ? '' : `${Number((v * 100).toFixed(1))}%`
+// % 칸 — 치는 숫자를 그대로 %로 읽는다. 12 → 12%, 12.5 → 12.5%
+// 예전엔 「1 이하면 비율, 넘으면 %」로 읽어서 "1"을 치는 순간 100% 가 됐다(12% 를 못 넣음).
+function PctInput({ value, onChange, placeholder, list }: {
+  value: number | null | undefined; onChange: (v: number | null) => void; placeholder?: string; list?: string
+}) {
+  const shown = value === null || value === undefined ? '' : String(Number((value * 100).toFixed(2)))
+  const [text, setText] = useState(shown)
+  const [editing, setEditing] = useState(false)
+  // 밖에서 값이 바뀌면(되돌리기 등) 따라간다 — 치는 중이 아닐 때만
+  useEffect(() => { if (!editing) setText(shown) }, [shown, editing])
+  return (
+    <span className="pct">
+      <input value={text} placeholder={placeholder} list={list} inputMode="decimal"
+        onFocus={() => setEditing(true)}
+        onBlur={() => { setEditing(false); setText(shown) }}
+        onChange={(e) => {
+          const t = e.target.value.replace(/[^\d.]/g, '')
+          setText(t)
+          const n = Number(t)
+          onChange(t.trim() === '' || !Number.isFinite(n) ? null : n / 100)
+        }} />
+      <i>%</i>
+    </span>
+  )
+}
+
 const numOf = (s: string): number | null => {
   const t = s.replace(/[^\d.-]/g, '')
   if (!t.trim()) return null
@@ -617,7 +640,7 @@ function PlanSheet({ plan, edit, onRename, onDuplicate }: { plan: ProductPlan; e
     <div className="sheet" data-cat={plan.category}>
       {/* 자주 쓰는 할인율 — 칸을 누르면 목록이 뜨지만, 직접 쳐 넣어도 된다 */}
       <datalist id="discount-list">
-        {DISCOUNTS.map((d) => <option key={d} value={`${d * 100}%`} />)}
+        {DISCOUNTS.map((d) => <option key={d} value={String(Math.round(d * 100))} />)}
       </datalist>
 
       <div className="sheet-title">
@@ -839,19 +862,12 @@ function PlanSheet({ plan, edit, onRename, onDuplicate }: { plan: ProductPlan; e
                   <td><input value={won(o.price)} onChange={(e) => set('price', numOf(e.target.value))} /></td>
                   <td><input className="real" value={won(o.realPrice)} placeholder={o.price ? won(o.price) : ''}
                     onChange={(e) => set('realPrice', numOf(e.target.value))} /></td>
-                  <td><input value={o.fee != null ? `${(o.fee * 100).toFixed(0)}%` : ''}
-                    onChange={(e) => { const v = numOf(e.target.value); set('fee', v === null ? 0.12 : (v > 1 ? v / 100 : v)) }} /></td>
+                  <td><PctInput value={o.fee} placeholder="12" onChange={(v) => set('fee', v === null ? 0.12 : v)} /></td>
                   <td><input value={won(o.shipping)} onChange={(e) => set('shipping', numOf(e.target.value) ?? 0)} /></td>
                   <td className="auto">{pct}</td>
                   <td className={`auto net ${cls}`}>{n === null ? '—' : won(n)}</td>
                   {/* 할인율은 그때그때 다르다 — 42%, 45% 처럼 직접 넣으신다 */}
-                  <td>
-                    <input value={pctText(o.discount)} placeholder="40%" list="discount-list"
-                      onChange={(e) => {
-                        const v = numOf(e.target.value)
-                        set('discount', v === null ? null : (v > 1 ? v / 100 : v))
-                      }} />
-                  </td>
+                  <td><PctInput value={o.discount} placeholder="40" list="discount-list" onChange={(v) => set('discount', v)} /></td>
                   <td className="auto">{won(listPriceOf(o)) || '—'}</td>
                   <td className="w1"><button className="x" title="이 옵션 줄 지우기" aria-label="이 옵션 지우기" onClick={() => edit((d) => { d.options.splice(i, 1) })}>×</button></td>
                 </tr>
@@ -905,8 +921,8 @@ function PlanSheet({ plan, edit, onRename, onDuplicate }: { plan: ProductPlan; e
                       <td className="auto">{won(o.cost) || '—'}</td>
                       <td><input value={o.temu?.shipping != null ? won(o.temu.shipping) : ''} placeholder={won(o.shipping) || '0'}
                         onChange={(e) => setT('shipping', numOf(e.target.value))} /></td>
-                      <td><input value={pctText(o.temu?.margin ?? TEMU_DEFAULT_MARGIN)} placeholder="15%"
-                        onChange={(e) => { const v = numOf(e.target.value); setT('margin', v === null ? null : (v > 1 ? v / 100 : v)) }} /></td>
+                      <td><PctInput value={o.temu?.margin ?? TEMU_DEFAULT_MARGIN} placeholder="15"
+                        onChange={(v) => setT('margin', v)} /></td>
                       <td><input className={o.temu?.price ? 'real' : ''} value={o.temu?.price ? won(o.temu.price) : ''}
                         placeholder={price != null ? won(price) : '—'} title="비우면 수익률로 계산한 값을 씁니다"
                         onChange={(e) => setT('price', numOf(e.target.value))} /></td>
