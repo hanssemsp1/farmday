@@ -219,6 +219,8 @@ body.plan-page .footer{display:none}
 .xl.grid .pct input{padding-right:22px;width:100%}
 .xl.grid .pct i{position:absolute;right:8px;top:50%;transform:translateY(-50%);
   font-style:normal;font-size:11.5px;color:#9A9284;pointer-events:none}
+/* 판매단가를 직접 적어서 거꾸로 계산된 수익률 — 계산값 칸과 같은 색으로 */
+.xl.grid .pct input.calc{background:var(--auto);color:#7A6A3A;font-weight:600}
 
 /* 테무 단가표 — 옵션 이름은 위 표에서 가져와 읽기만 한다 */
 .xl.grid.temu td.l.auto{background:0;color:var(--ink);font-weight:600;text-align:left;

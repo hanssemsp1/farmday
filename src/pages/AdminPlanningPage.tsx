@@ -18,8 +18,8 @@ import './AdminPlanningPage.css'
 const won = (n: number | null | undefined) => (n === null || n === undefined ? '' : Number(n).toLocaleString())
 // % 칸 — 치는 숫자를 그대로 %로 읽는다. 12 → 12%, 12.5 → 12.5%
 // 예전엔 「1 이하면 비율, 넘으면 %」로 읽어서 "1"을 치는 순간 100% 가 됐다(12% 를 못 넣음).
-function PctInput({ value, onChange, placeholder, list }: {
-  value: number | null | undefined; onChange: (v: number | null) => void; placeholder?: string; list?: string
+function PctInput({ value, onChange, placeholder, list, className }: {
+  value: number | null | undefined; onChange: (v: number | null) => void; placeholder?: string; list?: string; className?: string
 }) {
   const shown = value === null || value === undefined ? '' : String(Number((value * 100).toFixed(2)))
   const [text, setText] = useState(shown)
@@ -28,7 +28,7 @@ function PctInput({ value, onChange, placeholder, list }: {
   useEffect(() => { if (!editing) setText(shown) }, [shown, editing])
   return (
     <span className="pct">
-      <input value={text} placeholder={placeholder} list={list} inputMode="decimal"
+      <input value={text} placeholder={placeholder} list={list} inputMode="decimal" className={className}
         onFocus={() => setEditing(true)}
         onBlur={() => { setEditing(false); setText(shown) }}
         onChange={(e) => {
@@ -915,14 +915,18 @@ function PlanSheet({ plan, edit, onRename, onDuplicate }: { plan: ProductPlan; e
                   const diff = shown != null && coupang ? shown - coupang : null
                   const setT = (k: 'shipping' | 'margin' | 'price', v: number | null) =>
                     edit((d) => { d.options[i].temu = { ...(d.options[i].temu || {}), [k]: v } })
+                  // 판매단가를 직접 적었으면 수익률은 거꾸로 계산해 보여준다.
+                  // 그 상태에서 수익률을 다시 치면 판매단가를 풀어서 수익률 쪽이 기준이 된다.
+                  const pinned = !!o.temu?.price
+                  const shownMargin = pinned && price && net != null ? net / price : (o.temu?.margin ?? TEMU_DEFAULT_MARGIN)
                   return (
                     <tr key={i} className={net != null && net < 0 ? 'bad' : ''}>
                       <td className="l auto">{o.label || <i className="dim">이름 없는 옵션</i>}{o.weight && <span className="dim"> · {o.weight}</span>}</td>
                       <td className="auto">{won(o.cost) || '—'}</td>
                       <td><input value={o.temu?.shipping != null ? won(o.temu.shipping) : ''} placeholder={won(o.shipping) || '0'}
                         onChange={(e) => setT('shipping', numOf(e.target.value))} /></td>
-                      <td><PctInput value={o.temu?.margin ?? TEMU_DEFAULT_MARGIN} placeholder="15"
-                        onChange={(v) => setT('margin', v)} /></td>
+                      <td><PctInput value={shownMargin} placeholder="15" className={pinned ? 'calc' : ''}
+                        onChange={(v) => edit((d) => { d.options[i].temu = { ...(d.options[i].temu || {}), margin: v, price: null } })} /></td>
                       <td><input className={o.temu?.price ? 'real' : ''} value={o.temu?.price ? won(o.temu.price) : ''}
                         placeholder={price != null ? won(price) : '—'} title="비우면 수익률로 계산한 값을 씁니다"
                         onChange={(e) => setT('price', numOf(e.target.value))} /></td>
@@ -938,7 +942,8 @@ function PlanSheet({ plan, edit, onRename, onDuplicate }: { plan: ProductPlan; e
             </table>
           </div>
           <p className="xl-hint">
-            공급가·택배비를 바꾸면 여기도 같이 바뀝니다. 테무는 지금 수수료 0%라 남는 돈 = 판매단가 − 공급가 − 배송비입니다.
+            <b>수익률</b>을 적으면 판매단가가, <b>판매단가</b>를 적으면 수익률이 거꾸로 나옵니다 — 마지막에 적은 쪽이 기준입니다.
+            테무는 지금 수수료 0%라 남는 돈 = 판매단가 − 공급가 − 배송비입니다.
             쿠팡과 값을 맞추려면 <b>테무 노출가</b>가 쿠팡 판매가와 같아지도록 판매단가를 적으세요.
           </p>
         </>
