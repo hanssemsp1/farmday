@@ -1,0 +1,205 @@
+import * as XLSX from 'xlsx'
+import type { ProductPlan, CampaignReview } from '../../types/productPlan'
+
+// 체험단 — 두고애드에서 모집하고, 명단은 나중에 받는다.
+// 여기서는 "무엇을 써달라고 할지"(문구·별점·사진)를 만들어 두고,
+// 대표님이 쓰시던 리뷰양식.xlsx 모양 그대로 내려받는다.
+export default function CampaignSection({
+  plan, edit,
+}: {
+  plan: ProductPlan
+  edit: (fn: (d: ProductPlan) => void) => void
+}) {
+  const c = plan.campaign || { option: '', count: 30, requestDate: '', note: '', reviews: [] }
+  const rows = c.reviews || []
+
+  const setC = (patch: Partial<typeof c>) =>
+    edit((d) => { d.campaign = { ...d.campaign, ...patch } })
+
+  const setRow = (i: number, patch: Partial<CampaignReview>) =>
+    edit((d) => { d.campaign.reviews[i] = { ...d.campaign.reviews[i], ...patch } })
+
+  // 체험단은 늘 가장 싼 옵션으로 돌린다 — 비워 두면 이 값이 들어간다
+  const cheapest = (() => {
+    const priced = (plan.options || []).filter((o) => o.price)
+    if (!priced.length) return ''
+    const o = priced.reduce((a, b) => ((b.price ?? 0) < (a.price ?? 0) ? b : a))
+    return o.label || o.weight || ''
+  })()
+  const baseOption = c.option || cheapest
+
+  // 옵션을 하나 적으면 아래로 쭉 들어간다.
+  // 따로 바꿔 둔 줄(이전 기본값과 다른 값)은 건드리지 않는다.
+  const applyOption = (value: string, from: string) => edit((d) => {
+    d.campaign.option = value
+    d.campaign.reviews = (d.campaign.reviews || []).map((r) =>
+      (!r.option || r.option === from || r.option === cheapest) ? { ...r, option: value } : r)
+  })
+
+  // 사진은 리뷰1 … 리뷰N 으로 저장해서 건네준다. 인원수만큼 고를 수 있게 준비해 둔다.
+  const photoNames = Array.from(
+    { length: Math.max(rows.length, Number(c.count) || 30) },
+    (_, i) => `리뷰${i + 1}`,
+  )
+
+  // 인원수만큼 빈 줄을 만든다. 별점은 5점만 몰리지 않게 4~5점을 섞는다.
+  function makeRows() {
+    const n = Math.max(1, Math.min(500, Number(c.count) || 30))
+    edit((d) => {
+      const keep = d.campaign.reviews || []
+      const next: CampaignReview[] = []
+      for (let i = 0; i < n; i++) {
+        next.push(keep[i] ?? {
+          stars: i % 4 === 3 ? 4 : 5,      // 넷 중 하나는 4점
+          text: '',
+          // 사진 파일은 리뷰1 … 리뷰N 으로 저장해 건네준다. 없는 줄은 비우면 된다
+          photo: `리뷰${i + 1}`,
+          option: baseOption,
+        })
+      }
+      d.campaign.reviews = next
+      if (!d.campaign.option && cheapest) d.campaign.option = cheapest
+    })
+  }
+
+  const addRow = () => edit((d) => {
+    const n = (d.campaign.reviews || []).length
+    d.campaign.reviews = [...(d.campaign.reviews || []), { stars: 5, text: '', photo: `리뷰${n + 1}`, option: baseOption }]
+  })
+  const delRow = (i: number) => edit((d) => { d.campaign.reviews.splice(i, 1) })
+
+  // 같은 문구가 여러 개면 마켓이 어뷰징으로 잡는다 — 미리 알려준다
+  const written = rows.filter((r) => r.text.trim())
+  const dupes = (() => {
+    const seen = new Map<string, number>()
+    for (const r of written) {
+      const k = r.text.trim().replace(/\s+/g, '')
+      seen.set(k, (seen.get(k) || 0) + 1)
+    }
+    return [...seen.values()].filter((v) => v > 1).length
+  })()
+
+  // 대표님 리뷰양식 그대로 내려받기
+  function download() {
+    const head = ['NO', '작성요청날짜', '옵션', '제품명', '파일명', '이미지', '별점', '리뷰내용']
+    const body = rows.map((r, i) => [
+      i + 1,
+      c.requestDate || '',
+      r.option || baseOption,
+      plan.coupang?.name || plan.id,
+      r.photo || '',
+      r.photo ? 'O' : 'X',
+      `${r.stars}점`,
+      r.text || '',
+    ])
+    const ws = XLSX.utils.aoa_to_sheet([head, ...body])
+    ws['!cols'] = [{ wch: 5 }, { wch: 13 }, { wch: 16 }, { wch: 30 }, { wch: 10 }, { wch: 7 }, { wch: 7 }, { wch: 70 }]
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, '제품명')
+    XLSX.writeFile(wb, `리뷰양식_${plan.id}.xlsx`)
+  }
+
+  return (
+    <>
+      <div className="xl-head"><span>🎁</span>체험단 <span className="cnt">{written.length}/{rows.length} 작성</span></div>
+
+      <table className="xl">
+        <tbody>
+          <tr>
+            <th className="rowhead">모집 인원</th>
+            <td className="fill campset">
+              <input type="number" min={1} max={500} value={c.count ?? 30}
+                onChange={(e) => setC({ count: Number(e.target.value) })} />
+              <button className="campmake" onClick={makeRows}>이 인원수만큼 줄 만들기</button>
+              <span className="hintx">두고애드 모집 인원에 맞춰 넣으세요</span>
+            </td>
+          </tr>
+          <tr>
+            <th className="rowhead">작성요청날짜</th>
+            <td className="fill">
+              <input value={c.requestDate} placeholder="예: 2026-09-15"
+                onChange={(e) => setC({ requestDate: e.target.value })} />
+            </td>
+          </tr>
+          <tr>
+            <th className="rowhead">기본 옵션</th>
+            <td className="fill">
+              <input value={c.option} list="camp-options"
+                placeholder={cheapest ? `비우면 가장 싼 옵션 · ${cheapest}` : '예: 1kg 특대과'}
+                onChange={(e) => applyOption(e.target.value, c.option || cheapest)} />
+              <span className="hintx">여기 적으면 아래 줄에 다 들어갑니다</span>
+              <datalist id="camp-options">
+                {(plan.options || []).map((o, i) => (
+                  <option key={i} value={o.label || o.weight} />
+                ))}
+              </datalist>
+            </td>
+          </tr>
+          <tr>
+            <th className="rowhead">전달 안내</th>
+            <td className="fill">
+              <textarea rows={2} value={c.note}
+                placeholder="예: 네이버리뷰는 10자 이상 / 이미지는 10MB 미만 jpg·png"
+                onChange={(e) => setC({ note: e.target.value })} />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      {dupes > 0 && (
+        <div className="xl-warn">
+          <div><b>같은 문구가 있어요</b> — {dupes}가지가 겹칩니다. 마켓이 어뷰징으로 잡을 수 있으니 다르게 고쳐주세요.</div>
+        </div>
+      )}
+
+      {rows.length > 0 && (
+        <div className="xl-scroll">
+          <table className="xl grid camp">
+            <thead><tr>
+              <th className="w1">NO</th><th className="w2">별점</th><th className="wopt">옵션</th>
+              <th className="wfile">사진 파일명</th><th className="l">리뷰내용</th><th className="w1" />
+            </tr></thead>
+            <tbody>
+              {rows.map((r, i) => (
+                <tr key={i}>
+                  <td className="w1 no">{i + 1}</td>
+                  <td className="w2">
+                    <select value={r.stars} onChange={(e) => setRow(i, { stars: Number(e.target.value) })}>
+                      <option value={5}>5점</option>
+                      <option value={4}>4점</option>
+                    </select>
+                  </td>
+                  {/* 첫 줄에 적으면 아래로 쭉 들어간다. 둘째 줄부터는 그 줄만 바뀐다 */}
+                  <td className="wopt"><input value={r.option} placeholder={baseOption || '옵션'}
+                    title={i === 0 ? '여기 적으면 아래 줄에 다 들어갑니다' : undefined}
+                    onChange={(e) => i === 0
+                      ? applyOption(e.target.value, r.option || baseOption)
+                      : setRow(i, { option: e.target.value })} /></td>
+                  {/* 사진은 리뷰1~리뷰N 으로 저장해 전달하므로 고르기만 하면 된다.
+                      사진 없는 리뷰도 있으니 '없음'을 고를 수 있게 둔다. */}
+                  <td className="wfile">
+                    <select value={r.photo} onChange={(e) => setRow(i, { photo: e.target.value })}>
+                      <option value="">— 없음 —</option>
+                      {photoNames.map((n) => <option key={n} value={n}>{n}</option>)}
+                      {r.photo && !photoNames.includes(r.photo) && <option value={r.photo}>{r.photo}</option>}
+                    </select>
+                  </td>
+                  <td className="l"><textarea rows={2} value={r.text} placeholder="이 사람이 쓸 리뷰 문구"
+                    onChange={(e) => setRow(i, { text: e.target.value })} /></td>
+                  <td className="w1"><button className="x" title="이 줄 지우기" onClick={() => delRow(i)}>×</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <div className="camp-actions">
+        <button className="xl-add" onClick={addRow}>＋ 한 줄 추가</button>
+        {rows.length > 0 && (
+          <button className="camp-dl" onClick={download}>⬇ 리뷰양식 내려받기 (.xlsx)</button>
+        )}
+      </div>
+    </>
+  )
+}
