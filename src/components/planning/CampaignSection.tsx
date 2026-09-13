@@ -70,8 +70,8 @@ export default function CampaignSection({
         next.push(keep[i] ?? {
           stars: i % 4 === 3 ? 4 : 5,      // 넷 중 하나는 4점
           text: '',
-          // 사진 파일은 리뷰1 … 리뷰N 으로 저장해 건네준다. 없는 줄은 비우면 된다
-          photo: `리뷰${i + 1}`,
+          // 사진은 비워 둔다 — 있는 줄만 대표님이 고른다 (미리 채워 두면 헷갈린다)
+          photo: '',
           option: baseOption,
         })
       }
@@ -82,7 +82,8 @@ export default function CampaignSection({
 
   const addRow = () => edit((d) => {
     const n = (d.campaign.reviews || []).length
-    d.campaign.reviews = [...(d.campaign.reviews || []), { stars: 5, text: '', photo: `리뷰${n + 1}`, option: baseOption }]
+    void n
+    d.campaign.reviews = [...(d.campaign.reviews || []), { stars: 5, text: '', photo: '', option: baseOption }]
   })
   const delRow = (i: number) => edit((d) => { d.campaign.reviews.splice(i, 1) })
 
@@ -119,7 +120,15 @@ export default function CampaignSection({
 
   return (
     <>
-      <div className="xl-head"><span>🎁</span>체험단 <span className="cnt">{written.length}/{rows.length} 작성</span></div>
+      <div className="xl-head"><span>🎁</span>체험단 <span className="cnt">{written.length}/{rows.length} 작성</span>
+        {/* 예전에 만든 줄은 사진이 리뷰1…N 으로 미리 채워져 있다 — 한 번에 비운다 */}
+        {rows.some((r) => r.photo) && (
+          <button className="campmake" style={{ marginLeft: 'auto' }}
+            onClick={() => edit((d) => { d.campaign.reviews = d.campaign.reviews.map((r) => ({ ...r, photo: '' })) })}>
+            사진 선택 전부 비우기
+          </button>
+        )}
+      </div>
 
       <table className="xl">
         <tbody>
