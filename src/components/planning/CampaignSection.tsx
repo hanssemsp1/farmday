@@ -59,6 +59,12 @@ export default function CampaignSection({
     { length: Math.max(rows.length, Number(c.count) || 30) },
     (_, i) => `리뷰${i + 1}`,
   )
+  // 예전에 만든 줄에는 같은 사진이 겹쳐 있을 수 있다 — 고르는 칸은 잠그고, 이미 겹친 건 알려준다
+  const photoDupes = (() => {
+    const seen = new Map<string, number>()
+    rows.forEach((r) => { if (r.photo) seen.set(r.photo, (seen.get(r.photo) || 0) + 1) })
+    return [...seen.entries()].filter(([, n]) => n > 1).map(([p]) => p)
+  })()
 
   // 인원수만큼 빈 줄을 만든다. 별점은 5점만 몰리지 않게 4~5점을 섞는다.
   function makeRows() {
@@ -173,9 +179,10 @@ export default function CampaignSection({
         </tbody>
       </table>
 
-      {dupes > 0 && (
+      {(dupes > 0 || photoDupes.length > 0) && (
         <div className="xl-warn">
-          <div><b>같은 문구가 있어요</b> — {dupes}가지가 겹칩니다. 마켓이 어뷰징으로 잡을 수 있으니 다르게 고쳐주세요.</div>
+          {dupes > 0 && <div><b>같은 문구가 있어요</b> — {dupes}가지가 겹칩니다. 마켓이 어뷰징으로 잡을 수 있으니 다르게 고쳐주세요.</div>}
+          {photoDupes.length > 0 && <div><b>같은 사진이 두 줄 이상에 있어요</b> — {photoDupes.join(', ')}. 한 줄만 남기고 바꿔주세요.</div>}
         </div>
       )}
 
@@ -207,7 +214,11 @@ export default function CampaignSection({
                   <td className="wfile">
                     <select value={r.photo} onChange={(e) => setRow(i, { photo: e.target.value })}>
                       <option value="">— 없음 —</option>
-                      {photoNames.map((n) => <option key={n} value={n}>{n}</option>)}
+                      {/* 다른 줄이 이미 고른 사진은 못 고르게 잠근다 — 같은 사진이 두 번 나가면 안 된다 */}
+                      {photoNames.map((n) => {
+                        const taken = rows.some((o, k) => k !== i && o.photo === n)
+                        return <option key={n} value={n} disabled={taken}>{taken ? `${n} (다른 줄)` : n}</option>
+                      })}
                       {r.photo && !photoNames.includes(r.photo) && <option value={r.photo}>{r.photo}</option>}
                     </select>
                   </td>
