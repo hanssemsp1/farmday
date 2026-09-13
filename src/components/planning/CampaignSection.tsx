@@ -1,4 +1,22 @@
 import * as XLSX from 'xlsx'
+import { useLayoutEffect, useRef } from 'react'
+
+// 글이 길어지면 칸이 저절로 늘어난다 — 리뷰 문구는 서너 줄이 보통이라 잘리면 안 된다
+function Grow({ value, onChange, placeholder, min = 44 }: {
+  value: string; onChange: (v: string) => void; placeholder?: string; min?: number
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null)
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = Math.max(el.scrollHeight, min) + 'px'
+  }, [value, min])
+  return (
+    <textarea ref={ref} value={value} placeholder={placeholder} style={{ minHeight: min }}
+      onChange={(e) => onChange(e.target.value)} />
+  )
+}
 import type { ProductPlan, CampaignReview } from '../../types/productPlan'
 
 // 체험단 — 두고애드에서 모집하고, 명단은 나중에 받는다.
@@ -138,9 +156,9 @@ export default function CampaignSection({
           <tr>
             <th className="rowhead">전달 안내</th>
             <td className="fill">
-              <textarea rows={2} value={c.note}
+              <Grow value={c.note} min={52}
                 placeholder="예: 네이버리뷰는 10자 이상 / 이미지는 10MB 미만 jpg·png"
-                onChange={(e) => setC({ note: e.target.value })} />
+                onChange={(v) => setC({ note: v })} />
             </td>
           </tr>
         </tbody>
@@ -184,8 +202,8 @@ export default function CampaignSection({
                       {r.photo && !photoNames.includes(r.photo) && <option value={r.photo}>{r.photo}</option>}
                     </select>
                   </td>
-                  <td className="l"><textarea rows={2} value={r.text} placeholder="이 사람이 쓸 리뷰 문구"
-                    onChange={(e) => setRow(i, { text: e.target.value })} /></td>
+                  <td className="l"><Grow value={r.text} placeholder="이 사람이 쓸 리뷰 문구"
+                    onChange={(v) => setRow(i, { text: v })} /></td>
                   <td className="w1"><button className="x" title="이 줄 지우기" onClick={() => delRow(i)}>×</button></td>
                 </tr>
               ))}
