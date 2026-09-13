@@ -18,10 +18,14 @@ body.plan-page .footer{display:none}
 }
 .plan .icon{width:14px;height:14px;fill:currentColor;flex-shrink:0}
 
-.plan-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;
-  padding:30px 0 22px;border-bottom:1px solid var(--line)}
-.plan-head h1{font-size:26px;font-weight:800;letter-spacing:-.02em}
-.plan-head p{margin-top:7px;font-size:13px;color:var(--mute);line-height:1.65}
+/* 머리는 낮게 — 본문(기획서)이 화면을 써야 한다. 제목과 설명을 한 줄에 둔다 */
+.plan-head{display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding:12px 0 10px;border-bottom:1px solid var(--line)}
+.plan-head>div{display:flex;align-items:baseline;gap:14px;min-width:0}
+.plan-head h1{font-size:18px;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
+.plan-head p{margin:0;font-size:12px;color:var(--mute);line-height:1.4;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plan-head .btn{padding:8px 14px;font-size:13px}
 
 /* 분할창의 두 칸 — 남는 높이를 다 차지하고, 각자 안에서 스크롤 */
 .plan-body{display:grid;grid-template-columns:250px 1fr;gap:30px;
@@ -282,15 +286,19 @@ body.plan-page .footer{display:none}
   height:fit-content;white-space:nowrap}
 
 /* 저장 바 */
+/* 아래 바는 한 줄로 얇게 — 단추 글자가 두 줄로 꺾이면 바가 두 배로 두꺼워져 본문을 가린다 */
 .plan-bar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);
   backdrop-filter:blur(8px);border-top:1px solid var(--line);z-index:20;
-  padding:12px max(20px,calc((100vw - 1200px) / 2));display:flex;align-items:center;gap:14px;
-  font-size:12.5px;color:var(--mute)}
-.plan-bar .sp{flex:1}
+  padding:7px max(20px,calc((100vw - 1200px) / 2));display:flex;align-items:center;gap:8px;
+  font-size:12px;color:var(--mute);white-space:nowrap}
+.plan-bar>span{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.plan-bar .sp{flex:1;min-width:8px}
 .plan-bar .dirty{color:var(--amber);font-weight:700}
+.plan-bar button,.plan-bar .btn{white-space:nowrap;flex-shrink:0}
+.plan-bar .btn{padding:7px 14px;font-size:13px}
 .plan-notice{color:var(--green);font-weight:600}
 .plan-ghost{background:0;border:1px solid var(--line);cursor:pointer;color:var(--mute);
-  padding:8px 15px;font-size:12.5px;font-family:inherit;border-radius:6px}
+  padding:6px 11px;font-size:12px;font-family:inherit;border-radius:6px}
 /* 되돌리기 — 쓸 수 있을 때만 또렷하게 */
 .plan-ghost.undo{color:var(--ink);border-color:var(--gold)}
 .plan-ghost.undo em{font-style:normal;margin-left:5px;font-size:11px;font-weight:700;

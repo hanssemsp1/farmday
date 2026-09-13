@@ -18,6 +18,7 @@ interface DbPlan {
   competitors: ProductPlan['competitors'] | null
   content: ProductPlan['content'] | null
   reviews: ProductPlan['reviews'] | null
+  campaign: ProductPlan['campaign'] | null
   assets: ProductPlan['assets'] | null
   updated_at: string | null
 }
@@ -53,9 +54,12 @@ function fromDb(r: DbPlan): ProductPlan {
       thumbs: c.thumbs ?? {},
       details: c.details ?? {},
       extras: c.extras ?? [],
+      thumbExtras: c.thumbExtras ?? [],
+      pics: c.pics ?? {},
       notes: c.notes ?? [],
     },
     reviews: r.reviews ?? [],
+    campaign: { option: '', count: 30, requestDate: '', note: '', reviews: [], ...(r.campaign ?? {}) },
     assets: { folder: '', preview: '', ...(r.assets ?? {}) },
     updatedAt: r.updated_at ?? undefined,
   }
@@ -73,6 +77,7 @@ function toDb(p: ProductPlan) {
     competitors: p.competitors,
     content: p.content,
     reviews: p.reviews,
+    campaign: p.campaign,
     assets: p.assets,
   }
 }
@@ -91,7 +96,20 @@ export async function fetchPlan(id: string): Promise<ProductPlan | null> {
 
 // 같은 id가 있으면 덮어쓰고 없으면 새로 만든다
 export async function savePlan(plan: ProductPlan): Promise<ProductPlan> {
-  const { data, error } = await supabase.from(TABLE).upsert(toDb(plan)).select().single()
+  const row = toDb(plan)
+  let { data, error } = await supabase.from(TABLE).upsert(row).select().single()
+  // 서버에 「체험단」 칸(campaign)이 아직 없으면 저장이 통째로 막힌다.
+  // 그 칸만 빼고 다시 저장해서 나머지 기획서라도 잃지 않게 한다.
+  // 칸은 supabase/product_plans_campaign.sql 로 만든다.
+  if (error && /campaign/.test(error.message) && /column|schema/.test(error.message)) {
+    const { campaign: _dropped, ...rest } = row
+    void _dropped
+    ;({ data, error } = await supabase.from(TABLE).upsert(rest).select().single())
+    if (!error) {
+      const saved = fromDb(data as DbPlan)
+      return { ...saved, campaign: plan.campaign }   // 화면에 적어둔 체험단 내용은 그대로 둔다
+    }
+  }
   if (error) throw error
   return fromDb(data as DbPlan)
 }
