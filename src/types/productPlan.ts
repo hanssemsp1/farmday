@@ -69,6 +69,7 @@ export interface CampaignReview {
   text: string           // 리뷰 문구 — 사람마다 달라야 한다
   photo: string          // 같이 올릴 사진 (사진1, 사진2 …)
   option: string         // 어떤 옵션을 산 것으로 할지
+  date?: string          // 이 사람의 작성요청날짜 — 한날에 몰리지 않게 며칠에 나눠 준다
   done?: boolean         // 전달 끝난 줄 표시
 }
 
@@ -83,7 +84,8 @@ export interface CampaignRecipient {
 export interface PlanCampaign {
   option: string         // 기본 옵션 (줄 만들 때 채워 넣는다)
   count: number          // 이번에 모집한 인원
-  requestDate: string    // 작성요청날짜
+  requestDate: string    // 작성요청 시작 날짜 — 줄마다 날짜가 없으면 이 날로 나간다
+  perDay?: number        // 하루에 몇 건씩 나눠 줄지 (기본 3)
   note: string           // 체험단에게 전할 안내
   reviews: CampaignReview[]
   // ── 송장 ──

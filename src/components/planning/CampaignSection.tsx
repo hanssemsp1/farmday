@@ -46,6 +46,22 @@ export default function CampaignSection({
   })()
   const baseOption = c.option || cheapest
 
+  // 작성요청날짜를 줄마다 나눠 넣는다 — 한날에 리뷰가 몰리면 티가 난다.
+  // 시작 날짜부터 하루 perDay 건씩 순서대로.
+  const spreadDates = () => {
+    const start = c.requestDate
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(start)) { window.alert('시작 날짜를 먼저 고르세요.'); return }
+    const per = Math.max(1, Number(c.perDay) || 3)
+    edit((d) => {
+      d.campaign.reviews = (d.campaign.reviews || []).map((r, i) => {
+        const dt = new Date(start + 'T00:00:00')
+        dt.setDate(dt.getDate() + Math.floor(i / per))
+        const y = dt.getFullYear(), m = String(dt.getMonth() + 1).padStart(2, '0'), day = String(dt.getDate()).padStart(2, '0')
+        return { ...r, date: `${y}-${m}-${day}` }
+      })
+    })
+  }
+
   // 옵션을 하나 적으면 아래로 쭉 들어간다.
   // 따로 바꿔 둔 줄(이전 기본값과 다른 값)은 건드리지 않는다.
   const applyOption = (value: string, from: string) => edit((d) => {
@@ -109,7 +125,7 @@ export default function CampaignSection({
     const head = ['NO', '작성요청날짜', '옵션', '제품명', '파일명', '이미지', '별점', '리뷰내용']
     const body = rows.map((r, i) => [
       i + 1,
-      c.requestDate || '',
+      r.date || c.requestDate || '',
       r.option || baseOption,
       plan.coupang?.name || plan.id,
       r.photo || '',
@@ -149,9 +165,15 @@ export default function CampaignSection({
           </tr>
           <tr>
             <th className="rowhead">작성요청날짜</th>
-            <td className="fill">
-              <input value={c.requestDate} placeholder="예: 2026-09-15"
+            <td className="fill campset">
+              <input type="date" className="date" value={c.requestDate}
                 onChange={(e) => setC({ requestDate: e.target.value })} />
+              <span className="hintx">부터 하루</span>
+              <input type="number" min={1} max={50} value={c.perDay ?? 3} style={{ width: 56 }}
+                onChange={(e) => setC({ perDay: Number(e.target.value) })} />
+              <span className="hintx">건씩</span>
+              <button className="campmake" onClick={spreadDates} disabled={!rows.length}>날짜 나눠 넣기</button>
+              <span className="hintx">줄마다 날짜가 들어갑니다 — 한날에 몰리지 않게</span>
             </td>
           </tr>
           <tr>
@@ -190,13 +212,15 @@ export default function CampaignSection({
         <div className="xl-scroll">
           <table className="xl grid camp">
             <thead><tr>
-              <th className="w1">NO</th><th className="w2">별점</th><th className="wopt">옵션</th>
+              <th className="w1">NO</th><th className="wdate">요청날짜</th><th className="w2">별점</th><th className="wopt">옵션</th>
               <th className="wfile">사진 파일명</th><th className="l">리뷰내용</th><th className="w1" />
             </tr></thead>
             <tbody>
               {rows.map((r, i) => (
                 <tr key={i}>
                   <td className="w1 no">{i + 1}</td>
+                  <td className="wdate"><input type="date" className="date" value={r.date || ''}
+                    onChange={(e) => setRow(i, { date: e.target.value })} /></td>
                   <td className="w2">
                     <select value={r.stars} onChange={(e) => setRow(i, { stars: Number(e.target.value) })}>
                       <option value={5}>5점</option>
