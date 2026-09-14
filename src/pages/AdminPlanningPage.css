@@ -349,19 +349,20 @@ body.plan-page .footer{display:none}
 .xl .sub .movebtns .mvv:hover:not(:disabled){background:var(--gold);color:#fff}
 
 /* 글 칸에 붙는 사진 줄 */
-.picstrip{display:flex;flex-wrap:wrap;gap:6px;align-items:center;
-  padding:6px 10px 9px;border-top:1px dashed var(--grid)}
+/* 아주 작게 — 글 칸이 주인공이고 사진 단추는 구석에 붙은 클립 하나면 된다 */
+.picstrip{display:flex;flex-wrap:wrap;gap:4px;align-items:center;
+  padding:1px 8px 3px;min-height:0}
 .picstrip.over{background:#FFFBEA;box-shadow:inset 0 0 0 2px var(--gold)}
 .picstrip .pic{position:relative;display:inline-flex}
-.picstrip .pic img{width:62px;height:62px;object-fit:cover;border-radius:6px;
+.picstrip .pic img{width:44px;height:44px;object-fit:cover;border-radius:5px;
   border:1px solid var(--grid);display:block}
 .picstrip .picx{position:absolute;top:-5px;right:-5px;width:18px;height:18px;padding:0;
   border:0;border-radius:50%;background:#fff;color:var(--mute);cursor:pointer;
   font-size:12px;line-height:1;box-shadow:0 1px 4px rgba(0,0,0,.22)}
 .picstrip .picx:hover{background:#B3261E;color:#fff}
-.picstrip .picadd{border:1px dashed var(--line);background:0;color:var(--mute);
-  border-radius:6px;padding:6px 11px;font-size:11.5px;font-family:inherit;cursor:pointer}
-.picstrip .picadd:hover{color:var(--ink);border-color:var(--gold);background:#FFFBEA}
+.picstrip .picadd{border:0;background:0;color:#B5AFA2;opacity:.6;
+  border-radius:4px;padding:0 4px;font-size:11px;line-height:18px;height:18px;font-family:inherit;cursor:pointer}
+.picstrip .picadd:hover{opacity:1;color:var(--ink);background:#FFFBEA}
 .picstrip .picadd:disabled{opacity:.5;cursor:default}
 .picstrip .picerr{font-size:11.5px;color:#B3261E}
 
