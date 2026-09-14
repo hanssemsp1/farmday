@@ -199,7 +199,9 @@ body.plan-page .footer{display:none}
 .xl .w1{width:34px} .xl .w2{width:64px}
 /* 숫자·중량 칸은 모두 같은 너비, 이름 칸만 남는 폭을 다 쓴다 */
 .xl.grid th:not(.l):not(.w1):not(.w2):not(.wopt):not(.wfile):not(.wdate){width:96px}
-.xl.grid th.l{width:auto;min-width:230px}
+/* 이름 칸은 폭을 못 박는다 — 남는 폭에 맡기면 숫자 칸이 많은 표에서 쭈그러져
+   「1.5kg / 소과 / 9-14과 내외」 같은 옵션명을 적을 데가 없어진다. 넘치면 표가 옆으로 굴러간다. */
+.xl.grid th.l{width:250px;min-width:250px}
 /* 칸이 좁아도 글이 삐져나오지 않게 */
 .xl.grid td{overflow:hidden;text-overflow:ellipsis}
 .xl.grid td.l input{text-overflow:ellipsis}
