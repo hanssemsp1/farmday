@@ -181,7 +181,8 @@ body.plan-page .footer{display:none}
 .xl.grid thead th.l,.xl.grid td.l{text-align:left}
 .xl.grid thead th.auto-th{background:var(--auto);color:#8A7433}
 .xl.grid td{text-align:right}
-.xl.grid input,.xl.grid select{text-align:right;padding:7px 9px}
+.xl.grid input,.xl.grid select{text-align:right;padding:7px 6px;font-size:13px}
+.xl.grid td.auto{padding:7px 5px;font-size:13px}
 .xl.grid td.l input{text-align:left}
 .xl.grid select{text-align:left;cursor:pointer;color:var(--mute)}
 /* 날짜 칸 — 비어 있을 땐 흐리게, 고르면 진하게 */
@@ -197,11 +198,11 @@ body.plan-page .footer{display:none}
 .xl.grid tr.bad td:not(.auto){background:#FCF1F0}
 .xl.grid tr.thin td:not(.auto){background:#FDF9F0}
 .xl .w1{width:34px} .xl .w2{width:64px}
-/* 숫자·중량 칸은 모두 같은 너비, 이름 칸만 남는 폭을 다 쓴다 */
-.xl.grid th:not(.l):not(.w1):not(.w2):not(.wopt):not(.wfile):not(.wdate){width:96px}
-/* 이름 칸은 폭을 못 박는다 — 남는 폭에 맡기면 숫자 칸이 많은 표에서 쭈그러져
-   「1.5kg / 소과 / 9-14과 내외」 같은 옵션명을 적을 데가 없어진다. 넘치면 표가 옆으로 굴러간다. */
-.xl.grid th.l{width:250px;min-width:250px}
+/* 표는 화면 폭 안에 들어간다 — 이름 칸이 폭의 22%, 숫자 칸들은 남는 폭을 똑같이 나눠 쓴다.
+   (숫자 칸을 96px로 못 박으면 칸이 열 개가 넘는 단가표가 화면보다 넓어져 오른쪽이 잘린다.
+    이름 칸을 250px로 못 박아도 마찬가지.) 화면이 아주 좁을 때만(640px 미만) 옆으로 굴러간다. */
+.xl.grid th.l{width:20%}
+.xl.grid.temu th.l{width:30%}
 /* 칸이 좁아도 글이 삐져나오지 않게 */
 .xl.grid td{overflow:hidden;text-overflow:ellipsis}
 .xl.grid td.l input{text-overflow:ellipsis}
