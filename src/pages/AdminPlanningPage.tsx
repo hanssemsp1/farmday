@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAutoGrow } from '../lib/useAutoGrow'
 import { useAuth } from '../context/AuthContext'
 import { isAdmin } from '../lib/adminConfig'
 import { fetchPlans, savePlan, deletePlan } from '../lib/productPlans'
@@ -63,12 +64,7 @@ function Auto({ value, onChange, placeholder, className, min = 38 }: {
   min?: number
 }) {
   const ref = useRef<HTMLTextAreaElement>(null)
-  useLayoutEffect(() => {
-    const el = ref.current
-    if (!el) return
-    el.style.height = 'auto'
-    el.style.height = Math.max(el.scrollHeight, min) + 'px'
-  }, [value, min])
+  useAutoGrow(ref, value, min)
   return (
     <textarea ref={ref} className={className} value={value} placeholder={placeholder}
       style={{ minHeight: min }} onChange={(e) => onChange(e.target.value)} />

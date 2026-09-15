@@ -1,17 +1,13 @@
 import * as XLSX from 'xlsx'
-import { useLayoutEffect, useRef } from 'react'
+import { useRef } from 'react'
+import { useAutoGrow } from '../../lib/useAutoGrow'
 
 // 글이 길어지면 칸이 저절로 늘어난다 — 리뷰 문구는 서너 줄이 보통이라 잘리면 안 된다
 function Grow({ value, onChange, placeholder, min = 44 }: {
   value: string; onChange: (v: string) => void; placeholder?: string; min?: number
 }) {
   const ref = useRef<HTMLTextAreaElement>(null)
-  useLayoutEffect(() => {
-    const el = ref.current
-    if (!el) return
-    el.style.height = 'auto'
-    el.style.height = Math.max(el.scrollHeight, min) + 'px'
-  }, [value, min])
+  useAutoGrow(ref, value, min)
   return (
     <textarea ref={ref} value={value} placeholder={placeholder} style={{ minHeight: min }}
       onChange={(e) => onChange(e.target.value)} />
