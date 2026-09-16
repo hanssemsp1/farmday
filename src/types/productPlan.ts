@@ -84,6 +84,7 @@ export interface CampaignRecipient {
 export interface PlanCampaign {
   option: string         // 기본 옵션 (줄 만들 때 채워 넣는다)
   count: number          // 이번에 모집한 인원
+  photoCount?: number    // 준비한 리뷰 사진 장수 — 글은 30개인데 사진은 24장인 경우가 있어 인원과 따로 둔다 (비우면 인원수)
   requestDate: string    // 작성요청 시작 날짜 — 줄마다 날짜가 없으면 이 날로 나간다
   perDay?: number        // 하루에 몇 건씩 나눠 줄지 (기본 3)
   note: string           // 체험단에게 전할 안내

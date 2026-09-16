@@ -66,11 +66,10 @@ export default function CampaignSection({
       (!r.option || r.option === from || r.option === cheapest) ? { ...r, option: value } : r)
   })
 
-  // 사진은 리뷰1 … 리뷰N 으로 저장해서 건네준다. 인원수만큼 고를 수 있게 준비해 둔다.
-  const photoNames = Array.from(
-    { length: Math.max(rows.length, Number(c.count) || 30) },
-    (_, i) => `리뷰${i + 1}`,
-  )
+  // 사진은 리뷰1 … 리뷰N 으로 저장해서 건네준다.
+  // 사진 장수를 따로 적었으면 그만큼만(글 30개·사진 24장이면 리뷰24까지), 안 적었으면 인원수만큼.
+  const photoTotal = Number(c.photoCount) > 0 ? Number(c.photoCount) : Math.max(rows.length, Number(c.count) || 30)
+  const photoNames = Array.from({ length: photoTotal }, (_, i) => `리뷰${i + 1}`)
   // 예전에 만든 줄에는 같은 사진이 겹쳐 있을 수 있다 — 고르는 칸은 잠그고, 이미 겹친 건 알려준다
   const photoDupes = (() => {
     const seen = new Map<string, number>()
@@ -157,6 +156,14 @@ export default function CampaignSection({
                 onChange={(e) => setC({ count: Number(e.target.value) })} />
               <button className="campmake" onClick={makeRows}>이 인원수만큼 줄 만들기</button>
               <span className="hintx">두고애드 모집 인원에 맞춰 넣으세요</span>
+            </td>
+          </tr>
+          <tr>
+            <th className="rowhead">리뷰 사진 장수</th>
+            <td className="fill campset">
+              <input type="number" min={0} max={500} value={c.photoCount ?? ''} placeholder={String(photoTotal)}
+                onChange={(e) => setC({ photoCount: e.target.value === '' ? undefined : Number(e.target.value) })} />
+              <span className="hintx">준비한 사진이 인원보다 적으면 여기 적으세요 — 사진 선택 칸에 리뷰1~리뷰{photoTotal}까지만 나옵니다</span>
             </td>
           </tr>
           <tr>
