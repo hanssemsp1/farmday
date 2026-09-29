@@ -4,6 +4,7 @@ import { useAutoGrow } from '../lib/useAutoGrow'
 import { useAuth } from '../context/AuthContext'
 import { isAdmin } from '../lib/adminConfig'
 import { fetchPlans, savePlan, deletePlan } from '../lib/productPlans'
+import { supabase } from '../lib/supabaseClient'
 import {
   ProductPlan, PlanOption, PlanExtraDetail, PlanExtraThumb, PLAN_CATEGORIES, THUMB_SLOTS, DETAIL_SLOTS,
   DISCOUNTS, emptyPlan, netOf, listPriceOf, marginPriceOf, doneCount,
@@ -113,13 +114,33 @@ export default function AdminPlanningPage() {
     return () => document.body.classList.remove('plan-page')
   }, [])
 
+  // 기획서 목록 불러오기.
+  // 로그인 세션이 아직 다 붙기 전에 요청이 나가면 서버(RLS)가 오류 없이 0건을 돌려줘서
+  // 「아직 등록한 상품이 없습니다」가 먼저 떴다. 그래서 (1) 세션 확인이 끝난 뒤에만 요청하고,
+  // (2) 0건이나 실패면 잠시 뒤 다시 시도하고, (3) 토큰이 새로 붙으면 한 번 더 불러온다.
   useEffect(() => {
-    if (!isAdmin(user)) return
-    fetchPlans()
-      .then(setPlans)
-      .catch((e) => setNotice('불러오지 못했습니다: ' + e.message))
-      .finally(() => setLoading(false))
-  }, [user])
+    if (authLoading || !isAdmin(user)) return
+    let cancelled = false
+    const load = async (attempt: number) => {
+      try {
+        const rows = await fetchPlans()
+        if (cancelled) return
+        if (rows.length === 0 && attempt < 3) { setTimeout(() => load(attempt + 1), 1500); return }
+        setPlans(rows)
+        setLoading(false)
+      } catch (e) {
+        if (cancelled) return
+        if (attempt < 3) { setTimeout(() => load(attempt + 1), 1500); return }
+        setNotice('불러오지 못했습니다: ' + (e instanceof Error ? e.message : String(e)))
+        setLoading(false)
+      }
+    }
+    load(0)
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') load(0)
+    })
+    return () => { cancelled = true; sub.subscription.unsubscribe() }
+  }, [user, authLoading])
 
   // ── 내가 정한 목록 차례 ──────────────────────────
   // 철이 아닌 상품이 위에 있으면 불편하다. 끌어서 옮긴 차례를 이 컴퓨터에 기억해 둔다.
