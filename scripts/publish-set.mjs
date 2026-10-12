@@ -41,6 +41,8 @@ const { data: plans, error: planErr } = await sb.from('product_plans').select('*
 if (planErr || !plans?.length) { console.error('기획서 없음:', cfg.planId); process.exit(1) }
 const plan = plans[0]
 const keep = (o) => !(cfg.excludeOptions && new RegExp(cfg.excludeOptions).test(o.label))
+// cfg.labels: 기획서 옵션 이름이 비어 있을 때(대표님 옛 기획서) 순서대로 붙일 이름
+if (cfg.labels) plan.options = (plan.options || []).map((o, i) => (o.label ? o : { ...o, label: cfg.labels[i] || o.weight || `옵션 ${i + 1}` }))
 const opts = (plan.options || []).filter(keep).map((o, i) => {
   const ship = o.shipping ?? cfg.shipping ?? 0
   const real = o.realPrice ?? o.price
@@ -53,7 +55,7 @@ for (const o of opts) console.log(`  ${o.label} | 쿠팡 ${o.realPrice ?? o.pric
 
 // ── 이미지 순서 ───────────────────────────────
 const files = fs.readdirSync(cfg.setDir).filter((f) => /\.png$/i.test(f) && !f.startsWith('_'))
-const thumb = files.find((f) => f === '썸네일1.png')
+const thumb = cfg.main ? cfg.main + '.png' : files.find((f) => f === '썸네일1.png') // cfg.main: 대표 썸네일 파일 이름(대표님 세트처럼 이름이 다를 때)
 const tail = ['포장', '보관법', '상세9', '교환반품', '카카오채널', '이벤트']
 const rank = (f) => {
   const b = f.replace(/\.png$/i, '')
