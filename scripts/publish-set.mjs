@@ -41,6 +41,12 @@ const { data: plans, error: planErr } = await sb.from('product_plans').select('*
 if (planErr || !plans?.length) { console.error('기획서 없음:', cfg.planId); process.exit(1) }
 const plan = plans[0]
 const keep = (o) => !(cfg.excludeOptions && new RegExp(cfg.excludeOptions).test(o.label))
+// cfg.extraPlans: 다른 기획서의 옵션을 뒤에 붙인다(같은 세트를 쓰는 대품·특품처럼 쿠팡엔 따로, 사이트엔 한 상품)
+for (const id of cfg.extraPlans || []) {
+  const { data: more } = await sb.from('product_plans').select('options').eq('id', id)
+  if (!more?.length) { console.error('기획서 없음:', id); process.exit(1) }
+  plan.options = [...(plan.options || []), ...(more[0].options || [])]
+}
 // cfg.labels: 기획서 옵션 이름이 비어 있을 때(대표님 옛 기획서) 순서대로 붙일 이름
 if (cfg.labels) plan.options = (plan.options || []).map((o, i) => (o.label ? o : { ...o, label: cfg.labels[i] || o.weight || `옵션 ${i + 1}` }))
 const opts = (plan.options || []).filter(keep).map((o, i) => {
@@ -132,5 +138,6 @@ if (gone.length) await sb.from('product_options').delete().in('id', gone)
 
 // 기획서 옵션에 사이트 가격을 적어 둔다(쿠팡 가격은 price/realPrice 그대로)
 plan.options = (plan.options || []).map((o) => { const s = opts.find((x) => x.label === o.label); return s ? { ...o, sitePrice: s.sitePrice } : o })
-await sb.from('product_plans').update({ options: plan.options }).eq('id', cfg.planId)
+// 다른 기획서 옵션을 합쳤을 때는 되써 넣지 않는다(합친 옵션이 원래 기획서에 섞이지 않게)
+if (!cfg.extraPlans) await sb.from('product_plans').update({ options: plan.options }).eq('id', cfg.planId)
 console.log(`\n올렸습니다 → 상품 id ${productId} · 대표 가격 ${row.price}원 (메인 옵션 ${main.label})`)
