@@ -15,6 +15,7 @@ interface DbProduct {
   thumbnail: string
   description: string | null
   detail_images: string[] | null
+  thumbnails?: string[] | null
   badges: Product['badges']
   sold_out: boolean
 }
@@ -33,6 +34,7 @@ function fromDb(row: DbProduct): Product {
     thumbnail: row.thumbnail,
     description: row.description ?? undefined,
     detailImages: row.detail_images ?? [],
+    thumbnails: row.thumbnails ?? [],
     badges: row.badges ?? [],
     soldOut: row.sold_out,
   }

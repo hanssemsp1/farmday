@@ -19,10 +19,12 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null)
+  const [slide, setSlide] = useState(0)
 
   useEffect(() => {
     if (!id) return
     setLoading(true)
+    setSlide(0)
     fetchProductById(id).then(({ data }) => {
       setProduct(data)
       setLoading(false)
@@ -47,6 +49,8 @@ export default function ProductDetailPage() {
   }
 
   const favorited = isFavorite(product.id)
+  // 추가 썸네일은 이미지 주소만 들어 있으므로 대표 썸네일과 같은 배경 형식으로 맞춘다
+  const slides = [product.thumbnail, ...(product.thumbnails ?? []).map((u) => `url("${u}") center/cover no-repeat`)]
   const hasOptions = !!product.options && product.options.length > 0
   const selectedOption = hasOptions ? product.options!.find((o) => o.id === selectedOptionId) : undefined
   const effectivePrice = selectedOption ? selectedOption.price : product.price
@@ -65,14 +69,32 @@ export default function ProductDetailPage() {
   return (
     <div className="container product-detail">
       <div className="pd-layout">
-        <div className="pd-thumb" style={{ background: product.thumbnail }}>
-          {effectiveSoldOut && <div className="sold-out-overlay">SOLD OUT</div>}
-          {product.badges && product.badges.length > 0 && (
-            <div className="product-badges">
-              {product.badges.map((b) => (
-                <span key={b} className={`badge badge-${b === 'sale' ? 'yellow' : b === 'new' ? 'accent' : 'green'}`}>
-                  {b === 'best' ? 'BEST' : b === 'new' ? 'NEW' : 'SALE'}
-                </span>
+        <div className="pd-media">
+          {/* 대표 썸네일 + 추가 썸네일을 옆으로 넘겨 본다. 썸네일 위에는 배지를 얹지 않는다(로고·제목을 가리지 않게) */}
+          <div className="pd-thumb" style={{ background: slides[slide] }}>
+            {effectiveSoldOut && <div className="sold-out-overlay">SOLD OUT</div>}
+            {slides.length > 1 && (
+              <>
+                <button className="pd-nav prev" aria-label="이전 사진" onClick={() => setSlide((slide - 1 + slides.length) % slides.length)}>
+                  <Icon name="chevron-right" className="icon-sm" />
+                </button>
+                <button className="pd-nav next" aria-label="다음 사진" onClick={() => setSlide((slide + 1) % slides.length)}>
+                  <Icon name="chevron-right" className="icon-sm" />
+                </button>
+                <span className="pd-count">{slide + 1} / {slides.length}</span>
+              </>
+            )}
+          </div>
+          {slides.length > 1 && (
+            <div className="pd-strip">
+              {slides.map((bg, i) => (
+                <button
+                  key={i}
+                  className={`pd-strip-item ${i === slide ? 'active' : ''}`}
+                  style={{ background: bg }}
+                  aria-label={`${i + 1}번째 사진 보기`}
+                  onClick={() => setSlide(i)}
+                />
               ))}
             </div>
           )}

@@ -79,6 +79,14 @@ async function upload(file, maxW) {
   return sb.storage.from('products').getPublicUrl(p).data.publicUrl
 }
 const thumbUrl = await upload(thumb, 1000)
+// 추가 썸네일(썸네일2~N, 번호 순) — 상품 화면 맨 위에서 넘겨 본다. cfg.thumbs 로 고를 수 있음
+const thumbNo = (f) => Number(f.match(/\d+/)[0])
+const extraThumbs = cfg.thumbs
+  ? cfg.thumbs.map((n) => n + '.png')
+  : files.filter((f) => /^썸네일\d+\.png$/.test(f) && f !== thumb).sort((a, b) => thumbNo(a) - thumbNo(b))
+console.log('  추가 썸네일:', extraThumbs.join(' → ') || '없음')
+const thumbUrls = []
+for (const f of extraThumbs) thumbUrls.push(await upload(f, 1000))
 const detailUrls = []
 for (const f of details) detailUrls.push(await upload(f, 780))
 
@@ -101,6 +109,11 @@ if (existing?.length) {
   const { data, error } = await sb.from('products').insert({ ...row, rating: 0, review_count: 0 }).select('id').single()
   if (error) throw error
   productId = data.id
+}
+// thumbnails 칸은 supabase/products_thumbnails.sql 실행 뒤에만 있다 — 없으면 건너뛴다
+{
+  const { error } = await sb.from('products').update({ thumbnails: thumbUrls }).eq('id', productId)
+  if (error) console.warn('  ⚠️ 추가 썸네일 저장 건너뜀(products_thumbnails.sql 실행 필요):', error.message)
 }
 await sb.from('product_options').delete().eq('product_id', productId)
 const { error: optErr } = await sb.from('product_options').insert(opts.map((o, i) => ({
