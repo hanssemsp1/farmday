@@ -82,8 +82,8 @@
   gap: 6px;
 }
 .discount-rate { color: var(--danger); font-weight: 700; font-size: 15px; }
-.product-price { font-weight: 800; font-size: 20px; color: #1c3b2e; letter-spacing: -0.01em; }
-.product-won { font-weight: 700; font-size: 14px; color: #1c3b2e; }
+.product-price { font-weight: 800; font-size: 20px; color: var(--price); letter-spacing: -0.01em; }
+.product-won { font-weight: 700; font-size: 14px; color: var(--price); }
 
 .product-original-price {
   display: block;

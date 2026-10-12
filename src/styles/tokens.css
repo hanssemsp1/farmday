@@ -23,6 +23,7 @@
   --text-muted: #6B6669;
   --surface: #FAFAFA;
   --danger: #E01E5A;
+  --price: #D0242C; /* 판매가 — 레드 계열 */
   --radius-pill: 999px;
   --radius-card: 12px;
   --shadow-card: 0 1px 3px rgba(29, 28, 29, 0.08);
