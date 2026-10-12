@@ -58,7 +58,7 @@ export default function BestProductsPage() {
             <br />
             팜데이 제철 상품
           </h1>
-          <p className="hero-desc">산지에서 바로 보냅니다 · 제철이 지난 상품은 맨 뒤에 품절로 둡니다</p>
+          <p className="hero-desc">주문 즉시 산지에서 보내드립니다</p>
         </div>
       </section>
 
