@@ -3,6 +3,7 @@
 // 실행: node scripts/publish-set.mjs <설정.json> [--dry]
 //   설정: { "planId": "여자만새꼬막", "setDir": "C:/…/결과/새꼬막_v1/완성", "name": "여자만 새꼬막",
 //          "category": "수산", "shipping": 0, "description": "한 줄 소개" }
+//   "order": ["상세1", …] 을 주면 상세 이미지를 그 순서 그대로 올린다(대표님이 만든 기존 세트용)
 //
 // 가격(우리 사이트) = 쿠팡 쿠폰 뒤 가격의 약 93%를 x,900원으로 내림.
 // 단, 결제수수료 3.5%·공급가·배송비를 빼고 15% 이상 남지 않으면 15%가 남는 가장 낮은 x,900원으로 올린다(쿠팡가를 넘으면 쿠팡가).
@@ -62,7 +63,7 @@ const rank = (f) => {
   const t = tail.indexOf(b)
   return t >= 0 ? 10000 + t : null
 }
-const details = files.map((f) => [f, rank(f)]).filter(([, r]) => r !== null).sort((a, b) => a[1] - b[1]).map(([f]) => f)
+const details = cfg.order ? cfg.order.map((n) => n + '.png') : files.map((f) => [f, rank(f)]).filter(([, r]) => r !== null).sort((a, b) => a[1] - b[1]).map(([f]) => f)
 console.log('  썸네일:', thumb, '\n  상세 순서:', details.join(' → '))
 if (dry) { console.log('\n--dry 라서 올리지 않았습니다.'); process.exit(0) }
 
