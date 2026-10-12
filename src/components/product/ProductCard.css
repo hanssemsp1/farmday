@@ -28,51 +28,52 @@
   letter-spacing: 0.05em;
 }
 
-.wish-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255,255,255,0.9);
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-.wish-btn:hover { color: var(--danger); }
-.wish-btn.active { color: var(--danger); }
-
-.product-badges {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  display: flex;
-  gap: 4px;
-}
-
 .product-info { padding: 12px 2px 0; }
 
-.product-brand {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  margin: 0 0 4px;
+
+.product-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
+/* 카테고리 색 = 팜데이 앞치마 색(야채 딥그린·과일 버건디·수산 딥블루·축산 차콜·식품 테라코타·선물 금갈색) */
+.product-cat { padding-left: 10px; position: relative; color: var(--cat, #6b6669); }
+.product-cat::before { content: ''; position: absolute; left: 0; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--cat, #6b6669); }
+.cat-veg { --cat: #2f5d3a; }
+.cat-fruit { --cat: #6e1e2c; }
+.cat-sea { --cat: #182a4a; }
+.cat-meat { --cat: #3d3d3d; }
+.cat-food { --cat: #a0522d; }
+.cat-gift { --cat: #8a6a2f; }
+.product-flag { color: #b8862b; }
 
 .product-name {
-  font-size: 14px;
-  font-weight: 500;
-  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1d1c1d;
+  margin: 0 0 4px;
   line-height: 1.4;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  min-height: 2.8em;
+}
+
+/* 품질 근거 한 줄 — 싼 것과의 단순 가격 비교가 아니라 「왜 이 값인지」를 가격 바로 위에 */
+.product-quality {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #7a5a3a;
+  margin: 0 0 10px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  min-height: 3em;
 }
 
 .product-price-row {
@@ -81,7 +82,8 @@
   gap: 6px;
 }
 .discount-rate { color: var(--danger); font-weight: 700; font-size: 15px; }
-.product-price { font-weight: 700; font-size: 16px; }
+.product-price { font-weight: 800; font-size: 20px; color: #1c3b2e; letter-spacing: -0.01em; }
+.product-won { font-weight: 700; font-size: 14px; color: #1c3b2e; }
 
 .product-original-price {
   display: block;
@@ -102,13 +104,28 @@
 .star-icon { color: var(--yellow); width: 14px; height: 14px; }
 .review-count { color: var(--text-muted); }
 
+.product-actions { display: flex; gap: 8px; margin-top: 12px; }
+.wish-btn {
+  flex: 0 0 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.wish-btn:hover { color: var(--danger); }
+.wish-btn.active { color: var(--danger); border-color: var(--danger); }
+
 .add-to-cart-btn {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  width: 100%;
-  margin-top: 10px;
   padding: 9px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--border);
