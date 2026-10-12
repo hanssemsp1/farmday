@@ -52,13 +52,13 @@ export default function BestProductsPage() {
     <div className="best-page">
       <section className="hero">
         <div className="container hero-inner">
-          <p className="hero-eyebrow">2026 SUMMER BEST</p>
+          <p className="hero-eyebrow">FARMDAY 제철 상품</p>
           <h1>
-            지금 가장 많이 찾는
+            지금 산지에서 가장 맛있는
             <br />
-            팜데이 베스트 상품
+            팜데이 제철 상품
           </h1>
-          <p className="hero-desc">최대 30% 할인 · 무료배송 · 오늘 발송</p>
+          <p className="hero-desc">산지에서 바로 보냅니다 · 제철이 지난 상품은 맨 뒤에 품절로 둡니다</p>
         </div>
       </section>
 
@@ -67,7 +67,7 @@ export default function BestProductsPage() {
           <Icon name="search" className="icon-sm" />
           <input
             type="text"
-            placeholder="베스트 상품 안에서 검색"
+            placeholder="제철 상품 안에서 검색"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
           />
