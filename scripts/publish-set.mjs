@@ -52,7 +52,8 @@ if (cfg.labels) plan.options = (plan.options || []).map((o, i) => (o.label ? o :
 const opts = (plan.options || []).filter(keep).map((o, i) => {
   const ship = o.shipping ?? cfg.shipping ?? 0
   const real = o.realPrice ?? o.price
-  const site = sitePrice(real, o.cost, ship)
+  // 사이트 전용 상품: 기획서에 sitePriceFixed가 있으면 그 값을 그대로(쿠팡 가격에서 계산하지 않음)
+  const site = o.sitePriceFixed ?? sitePrice(real, o.cost, ship)
   const net = Math.round(site * (1 - PG_FEE) - o.cost - ship)
   return { ...o, sitePrice: site, siteNet: net, sort: i }
 })
