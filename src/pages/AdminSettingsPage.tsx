@@ -1,3 +1,5 @@
+import BannerManager from '../components/admin/BannerManager'
+import LogoManager from '../components/admin/LogoManager'
 import { FormEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -45,9 +47,14 @@ export default function AdminSettingsPage() {
         <h1>사이트 설정</h1>
       </div>
 
+      {/* 메인 배너 — 사진·글씨를 여기서 바꾼다 */}
+      <BannerManager />
+
       {!loading && (
         <form className="admin-form" onSubmit={handleSubmit}>
-          <h2>회사 정보 (푸터에 표시돼요)</h2>
+          <LogoManager form={form} setForm={setForm} />
+
+          <h2 style={{marginTop:32}}>회사 정보 (푸터에 표시돼요)</h2>
 
           <div className="admin-form-grid">
             <div className="admin-field">

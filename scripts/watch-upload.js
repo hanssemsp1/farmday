@@ -5,7 +5,12 @@ import crypto from 'node:crypto'
 import chokidar from 'chokidar'
 import { createClient } from '@supabase/supabase-js'
 
-const ROOT = path.resolve('..', '제품명')
+// 상품 사진이 모이는 곳. 여기에 폴더를 만들고 사진을 넣으면 사이트에 올라간다.
+//   팜데이자료/쿠팡/{카테고리}/{상품}/썸네일1.png …
+// (예전에는 Agent/제품명 을 봤는데, 작업이 팜데이자료 쪽으로 옮겨져서 여기로 바꿨다 — 2026-08-18)
+// ⚠️ 반드시 path.resolve 로 감싼다. 슬래시(/)로 적어두면 윈도우의
+//    path.dirname() 이 돌려주는 역슬래시(\) 경로와 비교가 안 맞아 아무것도 안 올라간다.
+const ROOT = path.resolve('C:/Users/서현주/OneDrive/Desktop/팜데이자료/쿠팡')
 const CATEGORIES = ['과일', '야채', '수산', '축산', '선물세트', '식품']
 const IMAGE_EXT = /\.(png|jpe?g|webp)$/i
 const STABILITY_DELAY_MS = 8000
@@ -30,6 +35,9 @@ async function processProduct(productDir) {
     console.warn(`[건너뜀] 카테고리 폴더명이 올바르지 않아요: "${category}" (${name})`)
     return
   }
+
+  // _원본백업 · _뺀장 같은 보관 폴더는 상품이 아니다
+  if (name.startsWith('_')) return
 
   const { data: existing, error: lookupError } = await supabase
     .from('products')
@@ -140,6 +148,8 @@ async function main() {
   const watcher = chokidar.watch(ROOT, {
     depth: 3,
     ignoreInitial: false,
+    // _원본백업 · _뺀장 · 임시파일은 아예 보지 않는다
+    ignored: (p) => /[\\/][_~]/.test(p),
     awaitWriteFinish: { stabilityThreshold: 3000, pollInterval: 500 },
   })
 

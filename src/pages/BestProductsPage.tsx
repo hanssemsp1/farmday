@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ProductGrid from '../components/product/ProductGrid'
 import Icon from '../components/ui/Icon'
-import { useProducts } from '../context/ProductsContext'
+import { soldOutLast, useProducts } from '../context/ProductsContext'
 import './BestProductsPage.css'
 
 const SORT_OPTIONS = [
@@ -39,7 +39,7 @@ export default function BestProductsPage() {
     if (sort === 'price-asc') list.sort((a, b) => a.price - b.price)
     if (sort === 'price-desc') list.sort((a, b) => b.price - a.price)
     if (sort === 'new') list.sort((a, b) => (b.badges?.includes('new') ? 1 : 0) - (a.badges?.includes('new') ? 1 : 0))
-    return list
+    return soldOutLast(list)
   }, [sort, keyword, category, allProducts])
 
   function clearCategory() {

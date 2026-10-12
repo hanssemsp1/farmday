@@ -17,7 +17,8 @@ export function ProductsProvider({ children }: { children: ReactNode }) {
   function load() {
     setLoading(true)
     fetchProducts().then(({ data }) => {
-      setProducts(data)
+      // 제철이 지나 품절 처리한 상품은 판매 중인 상품 뒤로 보낸다 (순서는 그대로 유지)
+      setProducts(soldOutLast(data))
       setLoading(false)
     })
   }
@@ -29,6 +30,10 @@ export function ProductsProvider({ children }: { children: ReactNode }) {
   return (
     <ProductsContext.Provider value={{ products, loading, refetch: load }}>{children}</ProductsContext.Provider>
   )
+}
+
+export function soldOutLast(list: Product[]): Product[] {
+  return [...list.filter((p) => !p.soldOut), ...list.filter((p) => p.soldOut)]
 }
 
 export function useProducts() {

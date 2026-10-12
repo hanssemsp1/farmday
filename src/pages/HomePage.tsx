@@ -2,11 +2,11 @@ import HeroBanner from '../components/home/HeroBanner'
 import QuickCategories from '../components/home/QuickCategories'
 import PromoBanner from '../components/home/PromoBanner'
 import ProductSection from '../components/home/ProductSection'
-import { useProducts } from '../context/ProductsContext'
+import { soldOutLast, useProducts } from '../context/ProductsContext'
 
 export default function HomePage() {
   const { products } = useProducts()
-  const newArrivals = [...products].reverse().slice(0, 4)
+  const newArrivals = soldOutLast([...products].reverse()).slice(0, 4)
   const bestPicks = products.slice(0, 4)
 
   return (
