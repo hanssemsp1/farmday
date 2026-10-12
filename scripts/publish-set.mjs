@@ -115,11 +115,18 @@ if (existing?.length) {
   const { error } = await sb.from('products').update({ thumbnails: thumbUrls }).eq('id', productId)
   if (error) console.warn('  ⚠️ 추가 썸네일 저장 건너뜀(products_thumbnails.sql 실행 필요):', error.message)
 }
-await sb.from('product_options').delete().eq('product_id', productId)
-const { error: optErr } = await sb.from('product_options').insert(opts.map((o, i) => ({
-  product_id: productId, name: o.label.replace(/\s*⭐메인/, ''), price: o.sitePrice, sold_out: false, sort_order: i,
-})))
-if (optErr) throw optErr
+// 옵션은 이름으로 찾아 고친다 — 지우고 새로 만들면 옵션 id가 바뀌어 손님 장바구니에 담긴 옵션이 끊긴다
+const { data: oldOpts } = await sb.from('product_options').select('id,name').eq('product_id', productId)
+const wanted = opts.map((o, i) => ({ name: o.label.replace(/\s*⭐메인/, ''), price: o.sitePrice, sold_out: false, sort_order: i }))
+for (const w of wanted) {
+  const hit = oldOpts?.find((o) => o.name === w.name)
+  const { error } = hit
+    ? await sb.from('product_options').update(w).eq('id', hit.id)
+    : await sb.from('product_options').insert({ ...w, product_id: productId })
+  if (error) throw error
+}
+const gone = (oldOpts || []).filter((o) => !wanted.some((w) => w.name === o.name)).map((o) => o.id)
+if (gone.length) await sb.from('product_options').delete().in('id', gone)
 
 // 기획서 옵션에 사이트 가격을 적어 둔다(쿠팡 가격은 price/realPrice 그대로)
 plan.options = (plan.options || []).map((o) => { const s = opts.find((x) => x.label === o.label); return s ? { ...o, sitePrice: s.sitePrice } : o })

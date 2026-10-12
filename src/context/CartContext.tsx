@@ -1,4 +1,5 @@
-import { createContext, ReactNode, useContext, useState } from 'react'
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
+import { useProducts } from './ProductsContext'
 
 export interface CartLine {
   productId: string
@@ -48,6 +49,7 @@ const CartContext = createContext<CartContextValue | null>(null)
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLinesState] = useState<CartLine[]>(readStoredCart)
+  const { products, loading: productsLoading } = useProducts()
 
   function setLines(updater: (prev: CartLine[]) => CartLine[]) {
     setLinesState((prev) => {
@@ -113,6 +115,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const removeSet = new Set(keys.map((k) => lineKey(k.productId, k.optionId)))
     setLines((prev) => prev.filter((l) => !removeSet.has(lineKey(l.productId, l.optionId))))
   }
+
+  // 사이트에서 내린 상품이 장바구니에 남아 있으면 숫자만 보이고 장바구니는 비어 보인다 — 상품 목록을 받은 뒤 정리한다
+  useEffect(() => {
+    if (productsLoading || products.length === 0) return
+    const ids = new Set(products.map((p) => p.id))
+    if (lines.some((l) => !ids.has(l.productId))) setLines((prev) => prev.filter((l) => ids.has(l.productId)))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, productsLoading])
 
   const itemCount = lines.reduce((sum, l) => sum + l.quantity, 0)
 
