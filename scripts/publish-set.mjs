@@ -63,16 +63,17 @@ const rank = (f) => {
   const t = tail.indexOf(b)
   return t >= 0 ? 10000 + t : null
 }
-const details = cfg.order ? cfg.order.map((n) => n + '.png') : files.map((f) => [f, rank(f)]).filter(([, r]) => r !== null).sort((a, b) => a[1] - b[1]).map(([f]) => f)
+// order 항목이 경로(/ 포함)면 setDir 밖의 파일 — 사이트 공통 장(교환·반품 등)을 끼울 때
+const details = cfg.order ? cfg.order.map((n) => (/[\/]/.test(n) ? n : n + '.png')) : files.map((f) => [f, rank(f)]).filter(([, r]) => r !== null).sort((a, b) => a[1] - b[1]).map(([f]) => f)
 console.log('  썸네일:', thumb, '\n  상세 순서:', details.join(' → '))
 if (dry) { console.log('\n--dry 라서 올리지 않았습니다.'); process.exit(0) }
 
 async function upload(file, maxW) {
-  const img = await loadImage(fs.readFileSync(path.join(cfg.setDir, file)))
+  const img = await loadImage(fs.readFileSync(path.isAbsolute(file) ? file : path.join(cfg.setDir, file)))
   const w = Math.min(maxW, img.width), h = Math.round(img.height * w / img.width)
   const c = createCanvas(w, h); c.getContext('2d').drawImage(img, 0, 0, w, h)
   const buf = c.toBuffer('image/jpeg', 85)
-  const p = `sets/${encodeURIComponent(cfg.planId).replace(/%/g, '')}/${Date.now()}-${encodeURIComponent(file.replace(/\.png$/i, '')).replace(/%/g, '')}.jpg`
+  const p = `sets/${encodeURIComponent(cfg.planId).replace(/%/g, '')}/${Date.now()}-${encodeURIComponent(path.basename(file).replace(/\.png$/i, '')).replace(/%/g, '')}.jpg`
   const { error } = await sb.storage.from('products').upload(p, buf, { contentType: 'image/jpeg', upsert: true })
   if (error) throw new Error(`${file} 업로드 실패: ${error.message}`)
   return sb.storage.from('products').getPublicUrl(p).data.publicUrl
