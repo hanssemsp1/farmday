@@ -45,8 +45,8 @@ export default function MyPage() {
   const MENU_ITEMS = [
     { label: '주문내역', icon: 'tag' as const, value: `${orders.length}건`, to: '/mypage/orders' },
     { label: '찜한 상품', icon: 'heart' as const, value: `${favoriteIds.length}개`, to: '/wishlist' },
-    { label: '쿠폰함', icon: 'gift' as const, value: '2장', to: '/mypage/coupons' },
-    { label: '적립금', icon: 'sparkles' as const, value: '3,000P', to: '/mypage/points' },
+    { label: '쿠폰함', icon: 'gift' as const, value: '0장', to: '/mypage/coupons' },
+    { label: '적립금', icon: 'sparkles' as const, value: '0P', to: '/mypage/points' },
     { label: '알림', icon: 'bell' as const, value: `${unreadCount}개`, to: '/mypage/notifications' },
   ]
 

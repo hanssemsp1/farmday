@@ -7,14 +7,8 @@ interface PointHistory {
   amount: number
 }
 
-const HISTORY: PointHistory[] = [
-  { id: 'p1', date: '2026.07.25', label: '거봉 포도(특품) 구매 적립', amount: 120 },
-  { id: 'p2', date: '2026.07.18', label: '한우 등심 구매 적립', amount: 330 },
-  { id: 'p3', date: '2026.07.10', label: '리뷰 작성 적립', amount: 500 },
-  { id: 'p4', date: '2026.07.02', label: '해남 꿀고구마 구매 사용', amount: -1000 },
-  { id: 'p5', date: '2026.06.22', label: '전복 손질 구매 적립', amount: 260 },
-  { id: 'p6', date: '2026.06.09', label: '신규가입 축하 적립', amount: 3000 },
-]
+// 적립금 기능은 아직 없다 — 예시 내역을 보여주면 회원마다 가짜 적립이 보이므로 비워 둔다
+const HISTORY: PointHistory[] = []
 
 const BALANCE = HISTORY.reduce((sum, h) => sum + h.amount, 0)
 
@@ -29,6 +23,7 @@ export default function PointsPage() {
       </div>
 
       <h2 className="points-history-title">적립·사용 내역</h2>
+      {HISTORY.length === 0 && <p className="points-history-date">아직 적립·사용 내역이 없어요.</p>}
       <div className="points-history-list">
         {HISTORY.map((h) => (
           <div key={h.id} className="points-history-row">
