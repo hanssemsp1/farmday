@@ -1,0 +1,95 @@
+{
+  "id": "[사이트] 냉동 애플초당옥수수",
+  "category": "야채",
+  "status": "사이트",
+  "vendor": {
+    "name": "최고집 급냉 초당옥수수/애플 #cbgadecb 무료배송"
+  },
+  "options": [
+    {
+      "label": "특품 14cm 5개",
+      "weight": "특품 14cm 5개",
+      "cost": 10850,
+      "shipping": 0,
+      "fee": 0.035,
+      "price": 13900,
+      "sitePriceFixed": 13900,
+      "note": "사이트 전용 · 공급가 10850 · 순이익 2564원(18.4%)"
+    },
+    {
+      "label": "특품 14cm 10개",
+      "weight": "특품 14cm 10개",
+      "cost": 17400,
+      "shipping": 0,
+      "fee": 0.035,
+      "price": 21900,
+      "sitePriceFixed": 21900,
+      "note": "사이트 전용 · 공급가 17400 · 순이익 3734원(17.1%)"
+    },
+    {
+      "label": "특품 14cm 15개",
+      "weight": "특품 14cm 15개",
+      "cost": 25200,
+      "shipping": 0,
+      "fee": 0.035,
+      "price": 31900,
+      "sitePriceFixed": 31900,
+      "note": "사이트 전용 · 공급가 25200 · 순이익 5584원(17.5%)"
+    },
+    {
+      "label": "특품 14cm 20개",
+      "weight": "특품 14cm 20개",
+      "cost": 32300,
+      "shipping": 0,
+      "fee": 0.035,
+      "price": 39900,
+      "sitePriceFixed": 39900,
+      "note": "사이트 전용 · 공급가 32300 · 순이익 6204원(15.5%)"
+    },
+    {
+      "label": "두입 9cm 5개",
+      "weight": "두입 9cm 5개",
+      "cost": 7900,
+      "shipping": 0,
+      "fee": 0.035,
+      "price": 9900,
+      "sitePriceFixed": 9900,
+      "note": "사이트 전용 · 공급가 7900 · 순이익 1654원(16.7%)"
+    },
+    {
+      "label": "두입 9cm 10개",
+      "weight": "두입 9cm 10개",
+      "cost": 13050,
+      "shipping": 0,
+      "fee": 0.035,
+      "price": 16900,
+      "sitePriceFixed": 16900,
+      "note": "사이트 전용 · 공급가 13050 · 순이익 3259원(19.3%)"
+    },
+    {
+      "label": "두입 9cm 15개",
+      "weight": "두입 9cm 15개",
+      "cost": 18700,
+      "shipping": 0,
+      "fee": 0.035,
+      "price": 23900,
+      "sitePriceFixed": 23900,
+      "note": "사이트 전용 · 공급가 18700 · 순이익 4364원(18.3%)"
+    },
+    {
+      "label": "두입 9cm 20개",
+      "weight": "두입 9cm 20개",
+      "cost": 23600,
+      "shipping": 0,
+      "fee": 0.035,
+      "price": 29900,
+      "sitePriceFixed": 29900,
+      "note": "사이트 전용 · 공급가 23600 · 순이익 5254원(17.6%)"
+    }
+  ],
+  "content": {
+    "notes": [
+      "대표님 기존 세트를 사이트에 다시 올림 — 쿠팡 배송안내·이벤트 장 빼고 교환반품은 사이트 공통 장"
+    ]
+  }
+}
