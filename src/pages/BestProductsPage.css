@@ -3,6 +3,22 @@
   color: #fff;
   padding: 56px 0;
 }
+/* 카테고리 사진 띠 — 왼쪽은 어둡게 덮어 흰 글자를 읽히게, 사진 주인공은 가운데~오른쪽 */
+.hero.has-img {
+  background:
+    linear-gradient(90deg, rgba(8, 14, 11, 0.82) 0%, rgba(8, 14, 11, 0.55) 38%, rgba(8, 14, 11, 0) 68%),
+    var(--hero-img) center / cover no-repeat,
+    linear-gradient(120deg, var(--primary), var(--accent) 70%);
+  padding: 72px 0;
+  min-height: 260px;
+}
+/* 식품은 바탕이 진한 빨강이라 왼쪽을 조금 더 어둡게 */
+.hero.has-img.hero-food {
+  background:
+    linear-gradient(90deg, rgba(8, 6, 6, 0.88) 0%, rgba(8, 6, 6, 0.66) 42%, rgba(8, 6, 6, 0) 72%),
+    var(--hero-img) center / cover no-repeat,
+    linear-gradient(120deg, var(--primary), var(--accent) 70%);
+}
 .hero-eyebrow {
   font-size: 13px;
   font-weight: 700;
@@ -115,6 +131,15 @@
 
 @media (max-width: 768px) {
   .hero { padding: 40px 0; }
+  /* 휴대폰은 글자가 사진 위로 넓게 걸치니 덮개를 끝까지 */
+  .hero.has-img, .hero.has-img.hero-food {
+    background:
+      linear-gradient(90deg, rgba(8, 10, 9, 0.86) 0%, rgba(8, 10, 9, 0.62) 55%, rgba(8, 10, 9, 0.3) 100%),
+      var(--hero-img) 70% center / cover no-repeat,
+      linear-gradient(120deg, var(--primary), var(--accent) 70%);
+    padding: 48px 0;
+    min-height: 200px;
+  }
   .hero h1 { font-size: 26px; }
   .filter-bar { flex-direction: column; align-items: flex-start; }
   .filter-search { max-width: 100%; }

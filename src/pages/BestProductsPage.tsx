@@ -14,6 +14,13 @@ const SORT_OPTIONS = [
 
 type SortValue = (typeof SORT_OPTIONS)[number]['value']
 
+// 카테고리별 맨 위 띠 사진 — public/category-hero/<파일>.jpg (2400×800, 왼쪽 40%는 글자 자리)
+// 사진을 넣은 카테고리만 HERO_READY 에 적는다. 안 적힌 카테고리는 예전 색 띠 그대로.
+const HERO_FILE: Record<string, string> = {
+  '': 'all', 과일: 'fruit', 야채: 'veg', 수산: 'seafood', 축산: 'meat', 선물세트: 'gift', 식품: 'food',
+}
+const HERO_READY = new Set<string>(['all', 'fruit', 'veg', 'seafood', 'meat', 'gift', 'food'])
+
 export default function BestProductsPage() {
   const { products: allProducts } = useProducts()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -50,7 +57,10 @@ export default function BestProductsPage() {
 
   return (
     <div className="best-page">
-      <section className="hero">
+      <section
+        className={'hero' + (HERO_READY.has(HERO_FILE[category] ?? '') ? ' has-img hero-' + HERO_FILE[category] : '')}
+        style={HERO_READY.has(HERO_FILE[category] ?? '') ? ({ '--hero-img': `url(/category-hero/${HERO_FILE[category]}.jpg)` } as React.CSSProperties) : undefined}
+      >
         <div className="container hero-inner">
           <p className="hero-eyebrow">FARMDAY 제철 상품</p>
           <h1>
