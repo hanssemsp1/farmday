@@ -12,7 +12,7 @@ export default function ProductDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { isFavorite, toggleFavorite } = useFavorites()
-  const { addToCart } = useCart()
+  const { addToCart, toggleAll, toggleLine } = useCart()
 
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
@@ -64,6 +64,15 @@ export default function ProductDetailPage() {
     )
     setAdded(true)
     setTimeout(() => setAdded(false), 1500)
+  }
+
+  // 바로 구매: 장바구니의 다른 상품은 선택을 풀고, 이 상품(고른 옵션)만 선택해 장바구니 주문 화면으로 간다
+  function handleBuyNow() {
+    const option = selectedOption ? { id: selectedOption.id, name: selectedOption.name, price: selectedOption.price } : undefined
+    toggleAll(false)
+    addToCart(product!.id, quantity, option)
+    toggleLine(product!.id, option?.id, true)
+    navigate('/cart')
   }
 
   return (
@@ -169,9 +178,14 @@ export default function ProductDetailPage() {
               <Icon name="heart" />
             </button>
             {!effectiveSoldOut ? (
-              <Button variant="primary" size="lg" className="pd-add-btn" onClick={handleAddToCart}>
-                {added ? '장바구니에 담았어요!' : '장바구니 담기'}
-              </Button>
+              <>
+                <Button variant="outline" size="lg" className="pd-add-btn" onClick={handleAddToCart}>
+                  {added ? '장바구니에 담았어요!' : '장바구니 담기'}
+                </Button>
+                <Button variant="primary" size="lg" className="pd-add-btn" onClick={handleBuyNow}>
+                  바로 구매
+                </Button>
+              </>
             ) : (
               <Button variant="outline" size="lg" className="pd-add-btn" disabled>
                 품절된 상품이에요
