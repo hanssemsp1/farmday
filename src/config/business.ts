@@ -16,4 +16,5 @@ export const BUSINESS = {
 
 // 사이트 결제를 열지 여부. 토스 실결제 키·주문 배송지 칸·서버 결제 승인이 갖춰지기 전까지 false.
 // false면 장바구니의 주문 버튼이 카카오채널 주문 안내로 바뀐다.
-export const ORDERS_OPEN = false
+// 26.10.14 토스 퀵오픈(라이브 키)·비회원 구매·배포 전 확인을 마치고 연다.
+export const ORDERS_OPEN: boolean = true

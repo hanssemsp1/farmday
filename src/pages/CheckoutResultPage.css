@@ -31,7 +31,25 @@
   margin: 0 0 24px;
 }
 
+.checkout-result-code { font-size: 12px; color: var(--text-muted); margin: -16px 0 24px; }
+
+.checkout-result-breakdown {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 0 28px;
+  font-size: 14px;
+}
+.checkout-result-breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+.checkout-result-breakdown dt, .checkout-result-breakdown dd { margin: 0; }
+.checkout-result-breakdown .is-coupon { color: var(--accent); font-weight: 600; }
+
 .checkout-result-actions {
   display: flex;
   gap: 10px;
 }
+
+/* 비회원 주문번호 */
+.checkout-guest-no { margin: 16px auto 24px; max-width: 360px; padding: 14px 16px; border: 1px dashed var(--primary); border-radius: var(--radius-card); text-align: center; }
+.checkout-guest-no p { margin: 0 0 4px; font-size: 13px; color: var(--text-muted); }
+.checkout-guest-no strong { display: block; font-size: 20px; letter-spacing: 1px; margin-bottom: 6px; }
+.checkout-guest-no span { font-size: 12px; color: var(--text-muted); line-height: 1.5; }

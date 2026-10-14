@@ -18,7 +18,10 @@ export interface PlanOption {
   shipping: number          // 택배비 (있는 상품만)
   note: string
   priceAlt?: number | null  // 엑셀에 판매가가 두 개였을 때의 다른 값
-  // 테무 — 내가 올린 값에 테무가 7.5%를 얹어 손님에게 보여준다.
+  // 팜데이마켓(우리 사이트) — 쿠팡 칸과 따로 본다
+  sitePriceFixed?: number | null // 사이트 판매가를 직접 정했을 때 (비우면 자동 제안가) — scripts/publish-set.mjs 가 읽는다
+  sitePrice?: number | null      // 지금 사이트에 올라가 있는 값 (publish-set.mjs 가 올릴 때 적어 둔다, 화면에서는 읽기만)
+  // 테무 — 화면에서는 뺐다(26.10.14 팜데이마켓 가격표로 바꿈). 적어 둔 값은 지우지 않고 남겨 둔다. — 내가 올린 값에 테무가 7.5%를 얹어 손님에게 보여준다.
   temu?: {
     shipping?: number | null  // 테무 배송비 (비우면 위 택배비를 쓴다)
     margin?: number | null    // 수익률 0.15 = 15% (판매단가 기준, 쿠팡 마진율과 같은 셈법)
@@ -198,7 +201,43 @@ export function netOf(o: PlanOption): number | null {
   return Math.round(base * (1 - (o.fee ?? 0.12)) - o.cost - (o.shipping || 0))
 }
 
-// ── 테무 ──────────────────────────────────────
+// ── 팜데이마켓 ─────────────────────────────────
+// scripts/publish-set.mjs 의 sitePrice() 와 똑같은 셈 — 둘을 바꿀 때는 함께 바꾼다.
+//   제안가 = 쿠팡 실제판매가 × 0.93 을 x,900원으로 내림.
+//   단, 결제수수료 3.5%·공급가·배송비를 빼고 15%가 안 남으면 15%가 남는 가장 낮은 x,900원(쿠팡가를 넘으면 쿠팡가).
+// 전 상품 무료배송이라 배송비(공급처 택배비)는 원가에 들어간다.
+export const SITE_PG_FEE = 0.035 // 토스 카드 수수료 3.2% + 부가세
+export const SITE_MIN_MARGIN = 0.15
+const floor900 = (n: number) => Math.floor((n - 900) / 1000) * 1000 + 900
+const ceil900 = (n: number) => Math.ceil((n - 900) / 1000) * 1000 + 900
+
+export function siteShippingOf(o: PlanOption): number {
+  return o.shipping || 0
+}
+
+/** 자동 제안가 — 쿠팡 가격이 없으면 null (그때는 판매가를 직접 정한다) */
+export function siteSuggestOf(o: PlanOption): number | null {
+  const real = marginPriceOf(o)
+  if (!real) return null
+  let p = floor900(real * 0.93)
+  const need = ((o.cost ?? 0) + siteShippingOf(o)) / (1 - SITE_PG_FEE - SITE_MIN_MARGIN)
+  if (p < need) p = Math.min(ceil900(need), real)
+  return p
+}
+
+/** 사이트에 올라갈 판매가 = 직접 정한 값, 없으면 자동 제안가 */
+export function siteFinalOf(o: PlanOption): number | null {
+  return o.sitePriceFixed ?? siteSuggestOf(o)
+}
+
+/** 순이익 = 판매가 × (1 − 3.5%) − 공급가 − 배송비 */
+export function siteNetOf(o: PlanOption): number | null {
+  const p = siteFinalOf(o)
+  if (p == null || o.cost == null) return null
+  return Math.round(p * (1 - SITE_PG_FEE) - o.cost - siteShippingOf(o))
+}
+
+// ── 테무 (화면에서는 뺐다) ─────────────────────────
 // 테무는 수수료가 없고, 내가 올린 값에 7.5%를 얹어 손님에게 보여준다.
 export const TEMU_MARKUP = 0.075
 export const TEMU_DEFAULT_MARGIN = 0.15

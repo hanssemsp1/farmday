@@ -8,8 +8,9 @@ import { supabase } from '../lib/supabaseClient'
 import {
   ProductPlan, PlanOption, PlanExtraDetail, PlanExtraThumb, PLAN_CATEGORIES, THUMB_SLOTS, DETAIL_SLOTS,
   DISCOUNTS, emptyPlan, netOf, listPriceOf, marginPriceOf, doneCount,
-  TEMU_DEFAULT_MARGIN, temuPriceOf, temuShownOf, temuNetOf,
+  SITE_PG_FEE, siteSuggestOf, siteFinalOf, siteNetOf, siteShippingOf,
 } from '../types/productPlan'
+import { guessSupplier } from '../lib/supply'
 import Button from '../components/ui/Button'
 import Icon from '../components/ui/Icon'
 import PicStrip from '../components/planning/PicStrip'
@@ -904,53 +905,58 @@ function PlanSheet({ plan, edit, onRename, onDuplicate }: { plan: ProductPlan; e
         </div>
       )}
 
-      {/* ── 테무 단가표 ────────────────────────────────
-          옵션·공급가는 위 표에서 가져온다. 여기서는 배송비·수익률만 정하면
-          판매단가(내가 올릴 값)와 테무 노출가(손님이 보는 값, +7.5%)가 나온다. */}
+      {/* ── 팜데이마켓 가격표 ──────────────────────────
+          쿠팡 표와 따로 — 우리 사이트에 올라갈 값. 옵션·공급가·택배비는 위 표에서 가져온다.
+          자동 제안가는 scripts/publish-set.mjs 와 같은 셈(types/productPlan siteSuggestOf).
+          판매가를 직접 적으면 options[].sitePriceFixed 로 저장되고 publish-set 이 그 값을 올린다. */}
       {plan.options.length > 0 && (
         <>
-          <div className="xl-head"><Icon name="won" />테무 단가표
-            <span className="xl-head-sub">공급가+배송비에서 수익률만큼 남게 판매단가를 정하고, 테무가 7.5%를 얹어 보여줍니다</span>
+          <div className="xl-head"><Icon name="won" />팜데이마켓 가격표
+            <span className="xl-head-sub">우리 사이트 가격 — 쿠팡 가격과 따로 봅니다 (전 상품 무료배송, 결제수수료 3.5%)</span>
           </div>
           <div className="xl-scroll">
-            <table className="xl grid temu">
+            <table className="xl grid site-price">
               <thead><tr>
-                <th className="l">상품옵션명</th><th>공급가</th>
-                <th title="비우면 위 택배비를 씁니다">배송비</th>
-                <th title="판매단가에서 남는 비율 — 쿠팡 마진율과 같은 셈법">수익률</th>
-                <th className="auto-th" title="테무에 올릴 값. 직접 정하려면 적으세요">판매단가</th>
-                <th className="auto-th">남는 돈</th>
-                <th className="auto-th" title="손님에게 보이는 값 = 판매단가 × 1.075">테무 노출가</th>
-                <th className="auto-th" title="위 표의 실제판매가(없으면 판매가)">쿠팡 판매가</th>
+                <th className="l">상품옵션명</th>
+                <th className="auto-th" title="기획서 공급처 이름에서 자동">공급처</th>
+                <th className="auto-th">공급가</th>
+                <th className="auto-th" title="위 표의 택배비 — 무료배송이라 원가에 들어갑니다">배송비</th>
+                <th className="auto-th" title="토스 카드 3.2% + 부가세">수수료<br />3.5%</th>
+                <th className="auto-th" title="위 표의 실제판매가(없으면 판매가) — 참고만">쿠팡가<br />(참고)</th>
+                <th className="auto-th" title="쿠팡가의 93%를 x,900원으로 내림, 15%가 안 남으면 15% 남는 x,900원(쿠팡가 상한)">자동<br />제안가</th>
+                <th title="비우면 자동 제안가를 씁니다. 적으면 그 값이 사이트에 올라갑니다">판매가</th>
+                <th className="auto-th">순이익</th>
+                <th className="auto-th">이익률</th>
+                <th className="auto-th" title="지금 사이트에 올라가 있는 값">지금<br />사이트</th>
               </tr></thead>
               <tbody>
                 {plan.options.map((o, i) => {
-                  const price = temuPriceOf(o)
-                  const shown = temuShownOf(o)
-                  const net = temuNetOf(o)
+                  const supplier = guessSupplier(plan.vendor?.name ?? '')
+                  const suggest = siteSuggestOf(o)
+                  const final = siteFinalOf(o)
+                  const net = siteNetOf(o)
+                  const rate = net != null && final ? net / final : null
                   const coupang = marginPriceOf(o)
-                  const diff = shown != null && coupang ? shown - coupang : null
-                  const setT = (k: 'shipping' | 'margin' | 'price', v: number | null) =>
-                    edit((d) => { d.options[i].temu = { ...(d.options[i].temu || {}), [k]: v } })
-                  // 판매단가를 직접 적었으면 수익률은 거꾸로 계산해 보여준다.
-                  // 그 상태에서 수익률을 다시 치면 판매단가를 풀어서 수익률 쪽이 기준이 된다.
-                  const pinned = !!o.temu?.price
-                  const shownMargin = pinned && price && net != null ? net / price : (o.temu?.margin ?? TEMU_DEFAULT_MARGIN)
+                  const live = o.sitePrice ?? null
+                  const differs = live != null && final != null && live !== final
+                  const cls = net != null && net < 0 ? 'bad' : (rate != null && rate < 0.05 ? 'thin' : '')
                   return (
-                    <tr key={i} className={net != null && net < 0 ? 'bad' : ''}>
+                    <tr key={i} className={cls}>
                       <td className="l auto">{o.label || <i className="dim">이름 없는 옵션</i>}{o.weight && <span className="dim"> · {o.weight}</span>}</td>
+                      <td className="auto" title={plan.vendor?.name || ''}>{supplier ?? <span className="dim">—</span>}</td>
                       <td className="auto">{won(o.cost) || '—'}</td>
-                      <td><input value={o.temu?.shipping != null ? won(o.temu.shipping) : ''} placeholder={won(o.shipping) || '0'}
-                        onChange={(e) => setT('shipping', numOf(e.target.value))} /></td>
-                      <td><PctInput value={shownMargin} placeholder="15" className={pinned ? 'calc' : ''}
-                        onChange={(v) => edit((d) => { d.options[i].temu = { ...(d.options[i].temu || {}), margin: v, price: null } })} /></td>
-                      <td><input className={o.temu?.price ? 'real' : ''} value={o.temu?.price ? won(o.temu.price) : ''}
-                        placeholder={price != null ? won(price) : '—'} title="비우면 수익률로 계산한 값을 씁니다"
-                        onChange={(e) => setT('price', numOf(e.target.value))} /></td>
-                      <td className={`auto net ${net != null && net < 0 ? 'bad' : ''}`}>{net == null ? '—' : won(net)}</td>
-                      <td className="auto strong">{shown == null ? '—' : won(shown)}</td>
-                      <td className="auto">{coupang ? won(coupang) : '—'}
-                        {diff != null && diff !== 0 && <span className={`diff ${diff > 0 ? 'up' : 'down'}`}>{diff > 0 ? '+' : ''}{won(diff)}</span>}
+                      <td className="auto">{won(siteShippingOf(o)) || '0'}</td>
+                      <td className="auto">{final != null ? won(Math.round(final * SITE_PG_FEE)) : '—'}</td>
+                      <td className="auto dim">{coupang ? won(coupang) : '—'}</td>
+                      <td className="auto">{suggest != null ? won(suggest) : '—'}</td>
+                      <td><input className={o.sitePriceFixed != null ? 'real' : ''} value={o.sitePriceFixed != null ? won(o.sitePriceFixed) : ''}
+                        placeholder={suggest != null ? won(suggest) : '직접 적기'} title="비우면 자동 제안가를 씁니다"
+                        onChange={(e) => edit((d) => { d.options[i].sitePriceFixed = numOf(e.target.value) })} /></td>
+                      <td className={`auto net ${cls}`}>{net == null ? '—' : won(net)}</td>
+                      <td className={`auto ${cls}`}>{rate == null ? '—' : (rate * 100).toFixed(1) + '%'}</td>
+                      <td className="auto">
+                        {live != null ? <span className={differs ? 'site-live-diff' : ''}>{won(live)}</span> : <span className="dim">안 올림</span>}
+                        {differs && <span className="site-live-note">판매가와 다름</span>}
                       </td>
                     </tr>
                   )
@@ -959,13 +965,12 @@ function PlanSheet({ plan, edit, onRename, onDuplicate }: { plan: ProductPlan; e
             </table>
           </div>
           <p className="xl-hint">
-            <b>수익률</b>을 적으면 판매단가가, <b>판매단가</b>를 적으면 수익률이 거꾸로 나옵니다 — 마지막에 적은 쪽이 기준입니다.
-            테무는 지금 수수료 0%라 남는 돈 = 판매단가 − 공급가 − 배송비입니다.
-            쿠팡과 값을 맞추려면 <b>테무 노출가</b>가 쿠팡 판매가와 같아지도록 판매단가를 적으세요.
+            <b>판매가</b>를 비우면 자동 제안가를 씁니다. 직접 적으면 그 값이 사이트에 올라갑니다(사이트 올리기를 다시 돌릴 때).
+            순이익 = 판매가 × (1 − 3.5%) − 공급가 − 배송비. <b>지금 사이트 가격</b>이 빨갛게 보이면 사이트에 올라간 값과 이 표의 판매가가 달라요.
+            쿠팡 판매가는 참고로만 보여 주고, 쿠팡 표는 바뀌지 않습니다.
           </p>
         </>
       )}
-
       {/* ── 상세페이지 ────────────────────────────── */}
       <div className="xl-head"><Icon name="doc" />상세페이지</div>
       <table className="xl detail">

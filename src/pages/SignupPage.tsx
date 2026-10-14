@@ -1,15 +1,33 @@
-import { FormEvent, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { FormEvent, useEffect, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import { useAuth } from '../context/AuthContext'
+import { findAddress, preloadPostcode } from '../lib/postcode'
 import '../styles/auth.css'
 
 export default function SignupPage() {
   const navigate = useNavigate()
+  // 장바구니 「회원가입하고 3,000원 할인받기」로 왔으면 가입 뒤 장바구니로 (사이트 안 주소만)
+  const [params] = useSearchParams()
+  const next = params.get('next') ?? ''
+  const backTo = next.startsWith('/') && !next.startsWith('//') ? next : '/'
   const { signUp } = useAuth()
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
+  const [zipcode, setZipcode] = useState('')
+  const [address2, setAddress2] = useState('')
+  useEffect(() => preloadPostcode(), [])
+  async function pickAddress() {
+    try {
+      await findAddress((a) => {
+        setZipcode(a.zipcode)
+        setAddress(a.address)
+      })
+    } catch {
+      setNotice('주소 찾기를 열지 못했어요. 잠시 뒤 다시 눌러 주세요.')
+    }
+  }
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -34,6 +52,8 @@ export default function SignupPage() {
       name,
       phone,
       address,
+      zipcode,
+      address2,
     })
     setSubmitting(false)
 
@@ -45,7 +65,7 @@ export default function SignupPage() {
       setNotice('가입 확인 이메일을 보냈어요. 메일함에서 인증 링크를 눌러주세요.')
       return
     }
-    navigate('/')
+    navigate(backTo)
   }
 
   function handleSocial(provider: string) {
@@ -85,13 +105,25 @@ export default function SignupPage() {
           </div>
           <div className="form-field">
             <label htmlFor="address">주소</label>
+            <div className="addr-search-row">
+              <input id="zipcode" type="text" placeholder="우편번호" value={zipcode} readOnly className="addr-zip" />
+              <button type="button" className="addr-find-btn" onClick={pickAddress}>주소 찾기</button>
+            </div>
             <input
               id="address"
               type="text"
-              placeholder="배송받으실 주소를 입력하세요"
+              placeholder="「주소 찾기」를 눌러 주소를 골라 주세요"
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              readOnly
+              onClick={() => !address && pickAddress()}
               required
+            />
+            <input
+              id="address2"
+              type="text"
+              placeholder="상세 주소 (동·호수)"
+              value={address2}
+              onChange={(e) => setAddress2(e.target.value)}
             />
           </div>
           <div className="form-field">

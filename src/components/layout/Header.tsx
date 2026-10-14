@@ -90,6 +90,9 @@ export default function Header() {
               <Link to="/admin/planning" className="btn btn-sm btn-outline">
                 상품 기획
               </Link>
+              <Link to="/admin/orders" className="btn btn-sm btn-outline">
+                주문 발주
+              </Link>
               <Link to="/admin/diary" className="btn btn-sm btn-outline">
                 다이어리
               </Link>
@@ -103,9 +106,14 @@ export default function Header() {
               로그아웃
             </button>
           ) : (
-            <Link to="/login">
-              <Button size="sm" variant="accent">로그인</Button>
-            </Link>
+            <>
+              <Link to="/guest-orders" className="header-guest-link">
+                비회원 주문조회
+              </Link>
+              <Link to="/login">
+                <Button size="sm" variant="accent">로그인</Button>
+              </Link>
+            </>
           )}
         </nav>
       </div>

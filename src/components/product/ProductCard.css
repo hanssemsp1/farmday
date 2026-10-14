@@ -148,3 +148,10 @@
   background: var(--surface);
 }
 .add-to-cart-btn:disabled:hover { background: var(--surface); }
+
+/* 한 줄에 놓인 카드끼리 칸 맞추기 — 이름이 한 줄이든 두 줄이든 설명·가격·버튼이 같은 높이에 오게.
+   그리드 칸은 같은 높이로 늘어나므로 카드를 세로로 채우고 가격부터는 바닥에 붙인다 */
+.product-card { display: flex; flex-direction: column; height: 100%; }
+.product-info { flex: 1; display: flex; flex-direction: column; }
+.product-name { min-height: calc(15px * 1.4 * 2); }
+.product-price-row { margin-top: auto; }

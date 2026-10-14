@@ -23,6 +23,11 @@ import AdminProductsPage from './pages/AdminProductsPage'
 import AdminSettingsPage from './pages/AdminSettingsPage'
 import AdminPlanningPage from './pages/AdminPlanningPage'
 import AdminDiaryPage from './pages/AdminDiaryPage'
+import AdminOrdersPage from './pages/AdminOrdersPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
+import FindIdPage from './pages/FindIdPage'
+import GuestOrderPage from './pages/GuestOrderPage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import TermsPage from './pages/TermsPage'
 import PrivacyPage from './pages/PrivacyPage'
@@ -55,6 +60,11 @@ export default function App() {
           <Route path="/admin/products" element={<AdminProductsPage />} />
           <Route path="/admin/planning" element={<AdminPlanningPage />} />
           <Route path="/admin/diary" element={<AdminDiaryPage />} />
+          <Route path="/admin/orders" element={<AdminOrdersPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/find-id" element={<FindIdPage />} />
+          <Route path="/guest-orders" element={<GuestOrderPage />} />
           <Route path="/admin/settings" element={<AdminSettingsPage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path="/terms" element={<TermsPage />} />

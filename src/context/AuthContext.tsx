@@ -10,7 +10,7 @@ interface AuthContextValue {
   signUp: (
     email: string,
     password: string,
-    profile: { name: string; phone: string; address: string },
+    profile: { name: string; phone: string; address: string; zipcode?: string; address2?: string },
   ) => Promise<{ error: string | null; needsEmailConfirm: boolean }>
   signOut: () => Promise<void>
   updateProfile: (name: string) => Promise<{ error: string | null }>
@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signUp(
     email: string,
     password: string,
-    profile: { name: string; phone: string; address: string },
+    profile: { name: string; phone: string; address: string; zipcode?: string; address2?: string },
   ) {
     const { data, error } = await supabase.auth.signUp({
       email,

@@ -54,3 +54,30 @@
 .order-status.done { background: rgba(46, 182, 125, 0.12); color: #1c7a53; }
 .order-status.progress { background: rgba(18, 100, 163, 0.1); color: var(--accent); }
 .order-status.pending { background: rgba(236, 178, 46, 0.15); color: #8a6410; }
+
+/* 주문 한 건 묶음(줄 + 취소 칸) */
+.order-history-item { border-bottom: 1px solid var(--border); }
+.order-history-item:last-child { border-bottom: none; }
+.order-history-item .order-history-row { border-bottom: none; }
+.order-history-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+.order-status.canceled { background: var(--surface, #f1f1f1); color: var(--text-muted); }
+.order-cancel-btn { font: inherit; font-size: 12px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; color: var(--text); }
+.order-cancel-btn.danger { border-color: var(--danger); color: var(--danger); font-weight: 700; }
+.order-cancel-btn:disabled { opacity: 0.5; cursor: default; }
+.order-cancel-box { margin: 0 20px 16px; padding: 14px 16px; border-radius: 10px; background: var(--surface, #f7f7f7); display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+.order-cancel-box p { margin: 0; line-height: 1.6; }
+.order-cancel-box select { font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; max-width: 280px; }
+.order-cancel-actions { display: flex; gap: 8px; }
+.order-cancel-note { margin: 0 20px 14px; font-size: 13px; color: var(--accent); }
+
+/* 송장 — 누르면 택배사 조회 화면 */
+.order-tracking { margin: 0 20px 14px; display: flex; flex-direction: column; gap: 4px; }
+.order-tracking a { font-size: 13px; color: #1c7a53; font-weight: 600; }
+
+/* 주문 취소로 들어가는 입구 — 눈에 덜 띄는 회색 글자 링크(찾으면 한 번에 누를 수 있게: 취소를 주문보다 어렵게 만들지 않는다) */
+.order-cancel-link { margin-top: 6px; padding: 2px 0; border: none; background: none; color: var(--text-muted, #8a8a8a); font-size: 12px; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.order-cancel-link:hover { color: var(--text, #333); }
+
+/* 상태 배지와 「주문 취소」를 같은 가운데 선에 — 오른쪽 끝을 맞추면 배지 안쪽 여백 때문에 글자 끝이 어긋나 보인다 */
+.order-history-side { align-items: center; min-width: 76px; gap: 6px; }
+.order-history-side .order-cancel-link { margin-top: 0; }

@@ -5,6 +5,8 @@ import { useFavorites } from '../context/FavoritesContext'
 import { useAuth } from '../context/AuthContext'
 import { fetchOrders } from '../lib/orders'
 import { fetchNotifications } from '../lib/notifications'
+import { fetchFirstOrderCoupon } from '../lib/coupon'
+import { cancelView } from '../lib/orderCancel'
 import { DbOrder } from '../types/order'
 import './MyPage.css'
 
@@ -23,7 +25,12 @@ export default function MyPage() {
   }, [loading, user, navigate])
 
   useEffect(() => {
-    if (user) fetchOrders().then(({ data }) => setOrders(data))
+    if (user) fetchOrders(user.id).then(({ data }) => setOrders(data))
+  }, [user])
+
+  const [couponCount, setCouponCount] = useState(0)
+  useEffect(() => {
+    if (user) fetchFirstOrderCoupon(user.id).then((s) => setCouponCount(s.available ? 1 : 0))
   }, [user])
 
   useEffect(() => {
@@ -45,7 +52,7 @@ export default function MyPage() {
   const MENU_ITEMS = [
     { label: '주문내역', icon: 'tag' as const, value: `${orders.length}건`, to: '/mypage/orders' },
     { label: '찜한 상품', icon: 'heart' as const, value: `${favoriteIds.length}개`, to: '/wishlist' },
-    { label: '쿠폰함', icon: 'gift' as const, value: '0장', to: '/mypage/coupons' },
+    { label: '쿠폰함', icon: 'gift' as const, value: `${couponCount}장`, to: '/mypage/coupons' },
     { label: '적립금', icon: 'sparkles' as const, value: '0P', to: '/mypage/points' },
     { label: '알림', icon: 'bell' as const, value: `${unreadCount}개`, to: '/mypage/notifications' },
   ]
@@ -121,7 +128,7 @@ export default function MyPage() {
                     {order.items.length > 1 && ` 외 ${order.items.length - 1}건`}
                   </p>
                 </div>
-                <span className="order-status progress">{order.status}</span>
+                <span className="order-status progress">{cancelView(order).label}</span>
               </div>
             ))}
           </div>

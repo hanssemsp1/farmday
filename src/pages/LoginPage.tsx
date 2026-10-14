@@ -1,11 +1,15 @@
 import { FormEvent, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import { useAuth } from '../context/AuthContext'
 import '../styles/auth.css'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  // 장바구니에서 「로그인하고 주문」으로 왔으면 로그인 뒤 그 화면으로 (사이트 안 주소만)
+  const [params] = useSearchParams()
+  const next = params.get('next') ?? ''
+  const backTo = next.startsWith('/') && !next.startsWith('//') ? next : '/'
   const { signInWithPassword } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -23,7 +27,7 @@ export default function LoginPage() {
       setNotice(error === 'Invalid login credentials' ? '이메일 또는 비밀번호가 올바르지 않아요.' : error)
       return
     }
-    navigate('/')
+    navigate(backTo)
   }
 
   function handleSocial(provider: string) {
@@ -71,7 +75,11 @@ export default function LoginPage() {
               />
               로그인 상태 유지
             </label>
-            <a href="#" className="form-link">비밀번호 찾기</a>
+            <span className="form-link-group">
+              <Link to="/find-id" className="form-link">아이디 찾기</Link>
+              <span className="form-link-sep">|</span>
+              <Link to="/forgot-password" className="form-link">비밀번호 찾기</Link>
+            </span>
           </div>
 
           <Button type="submit" className="auth-submit" disabled={submitting}>
@@ -96,6 +104,10 @@ export default function LoginPage() {
 
         <p className="auth-footer">
           아직 회원이 아니신가요? <Link to="/signup" className="form-link">회원가입</Link>
+        </p>
+        {/* 휴대폰에서는 헤더의 「비회원 주문조회」가 숨겨지므로 여기에 한 줄 따로 둔다 */}
+        <p className="auth-footer auth-footer-guest">
+          비회원으로 주문하셨나요? <Link to="/guest-orders" className="form-link">비회원 주문조회</Link>
         </p>
       </div>
     </div>

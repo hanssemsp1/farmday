@@ -1,0 +1,54 @@
+.admin-orders { padding: 32px 20px 64px; }
+.admin-orders h1 { font-size: 24px; margin: 0 0 6px; }
+.ao-hint { font-size: 13px; color: var(--text-muted); margin: 0 0 14px; }
+.ao-hint code { background: var(--surface, #f4f4f4); padding: 1px 6px; border-radius: 4px; }
+.ao-box { border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px 20px; margin-bottom: 18px; }
+.ao-box h2 { font-size: 15px; margin: 0 0 6px; }
+.ao-warn { border-color: #e7b84c; background: #fffaf0; }
+.ao-map-row { display: grid; grid-template-columns: minmax(0, 1.2fr) 110px minmax(0, 1.6fr) 70px; gap: 8px; align-items: center; margin-top: 8px; }
+.ao-map-row input, .ao-map-row select { font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; }
+.ao-map-row button, .ao-export, .ao-tab { font: inherit; font-size: 13px; border-radius: 8px; padding: 8px 14px; cursor: pointer; border: 1px solid var(--primary); background: #fff; color: var(--primary); font-weight: 600; }
+.ao-prod { font-size: 13px; }
+.ao-prod em { color: var(--text-muted); font-style: normal; }
+.ao-actions { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.ao-export { background: var(--primary); color: #fff; }
+.ao-export:disabled { opacity: 0.4; cursor: default; }
+.ao-spacer { flex: 1; }
+.ao-tab.on { background: var(--primary); color: #fff; }
+.ao-notice { font-size: 13px; color: var(--primary); font-weight: 600; margin: 0 0 12px; }
+.ao-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-card); }
+.ao-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ao-table th, .ao-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+.ao-table th { background: var(--surface, #f7f7f7); font-weight: 700; white-space: nowrap; }
+.ao-table td.num { text-align: right; }
+.ao-table tr.done { color: var(--text-muted); }
+.ao-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.ao-miss { color: var(--danger); }
+@media (max-width: 720px) { .ao-map-row { grid-template-columns: 1fr 1fr; } }
+
+.ao-cancel { border-color: var(--danger); background: #fff6f8; }
+.ao-cancel .ao-map-row { grid-template-columns: minmax(0, 1fr) 0 100px 70px; }
+.ao-link { font: inherit; font-size: 12px; border: none; background: none; color: var(--danger); padding: 4px 0 0; cursor: pointer; text-decoration: underline; }
+
+/* 주문 목록 (상태·기간·검색) */
+.ao-upload { display: inline-flex; align-items: center; cursor: pointer; background: #fff; color: var(--primary); }
+.ao-filter { display: grid; grid-template-columns: 160px 160px 160px minmax(0, 1fr) auto; gap: 10px; align-items: end; border: 1px solid var(--border); border-radius: var(--radius-card); padding: 14px 16px; margin: 6px 0 12px; }
+.ao-filter label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-muted); }
+.ao-filter input, .ao-filter select { font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); }
+.ao-count { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; background: var(--surface, #f3f3f3); font-size: 12px; }
+.ao-badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.ao-badge.s-0 { background: #fff3d6; color: #8a6410; }
+.ao-badge.s-1 { background: #e8ecff; color: #3b4fb8; }
+.ao-badge.s-2 { background: #e2f3ff; color: #1264a3; }
+.ao-badge.s-3 { background: #e3f6ec; color: #1c7a53; }
+.ao-badge.s-4 { background: #ffe8ee; color: var(--danger); }
+.ao-badge.s-5 { background: #eee; color: var(--text-muted); }
+.ao-table .mono { font-family: ui-monospace, monospace; font-size: 12px; }
+.ao-track { color: #1c7a53; font-weight: 600; }
+.ao-link.plain { color: var(--primary); }
+.ao-row-actions { white-space: nowrap; }
+.ao-row-actions .ao-link { display: block; }
+@media (max-width: 900px) { .ao-filter { grid-template-columns: 1fr 1fr; } }
+
+/* 비회원 주문 표시 */
+.ao-guest { margin-left: 6px; padding: 1px 6px; border-radius: 999px; background: #EEF2FF; color: #3949AB; font-size: 11px; font-weight: 700; }

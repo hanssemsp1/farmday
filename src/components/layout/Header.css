@@ -157,3 +157,8 @@
   .logo-word{height:15px}
   .logo{gap:9px}
 }
+
+/* 로그인 안 했을 때 「비회원 주문조회」 글자 링크 */
+.header-guest-link { font-size: 13px; color: rgba(255, 255, 255, .8); text-decoration: none; white-space: nowrap; }
+.header-guest-link:hover { color: #fff; text-decoration: underline; }
+@media (max-width: 640px) { .header-guest-link { display: none; } }
