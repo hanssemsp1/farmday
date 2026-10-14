@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { useCart, CartLine } from '../context/CartContext'
 import { createOrder } from '../lib/orders'
 import { requestTossPayment } from '../lib/toss'
+import { BUSINESS, ORDERS_OPEN } from '../config/business'
 import './CartPage.css'
 
 const FREE_SHIPPING_THRESHOLD = 30000
@@ -38,6 +39,10 @@ export default function CartPage() {
   const total = subtotal + shipping
 
   async function handleCheckout() {
+    if (!ORDERS_OPEN) {
+      window.open(BUSINESS.kakaoChannel, '_blank', 'noopener,noreferrer')
+      return
+    }
     if (!user) {
       navigate('/login')
       return
@@ -199,19 +204,35 @@ export default function CartPage() {
             <span>총 결제금액</span>
             <span>{total.toLocaleString()}원</span>
           </div>
-          <Button
-            variant="primary"
-            size="lg"
-            className="checkout-btn"
-            disabled={selectedItems.length === 0 || submitting}
-            onClick={handleCheckout}
-          >
-            {submitting
-              ? '주문 처리 중...'
-              : selectedItems.length > 0
-                ? `${selectedItems.length}개 상품 주문하기`
-                : '상품을 선택해주세요'}
-          </Button>
+          {ORDERS_OPEN ? (
+            <Button
+              variant="primary"
+              size="lg"
+              className="checkout-btn"
+              disabled={selectedItems.length === 0 || submitting}
+              onClick={handleCheckout}
+            >
+              {submitting
+                ? '주문 처리 중...'
+                : selectedItems.length > 0
+                  ? `${selectedItems.length}개 상품 주문하기`
+                  : '상품을 선택해주세요'}
+            </Button>
+          ) : (
+            <>
+              <a
+                className="btn btn-lg checkout-btn checkout-kakao"
+                href={BUSINESS.kakaoChannel}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                카카오채널로 주문하기
+              </a>
+              <p className="cart-demo-note">
+                지금은 카카오채널로 주문받아요. 담으신 상품과 옵션을 보내 주시면 바로 안내해 드려요.
+              </p>
+            </>
+          )}
           {notice && <p className="cart-demo-note">{notice}</p>}
         </aside>
       </div>

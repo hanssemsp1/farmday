@@ -171,6 +171,9 @@
 }
 
 .checkout-btn { width: 100%; margin-top: 16px; }
+/* 결제를 열기 전까지 장바구니 주문 버튼 = 카카오채널 주문 안내(카카오 노랑) */
+.checkout-kakao { display: flex; align-items: center; justify-content: center; text-decoration: none; background: #FEE500; color: #191919; border-color: #FEE500; font-weight: 700; }
+.checkout-kakao:hover { background: #F5DC00; color: #191919; }
 
 .cart-demo-note {
   margin-top: 12px;
