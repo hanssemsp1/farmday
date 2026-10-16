@@ -6,7 +6,7 @@ export const BUSINESS = {
   businessRegNo: '604-28-94890',
   mailOrderNo: '제 2026-인천강화-0121 호',
   address: '인천광역시 강화군 화도면 해안남로 2898-2',
-  phone: '010-4275-4966',
+  phone: '010-4225-4966',
   email: 'farmfarmday@naver.com',
   hosting: 'Vercel Inc.',
   privacyOfficer: '서현주',
