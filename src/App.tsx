@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 import Header from './components/layout/Header'
 import CategoryNav from './components/layout/CategoryNav'
 import Footer from './components/layout/Footer'
+import InstallAppBar from './components/layout/InstallAppBar'
 import HomePage from './pages/HomePage'
 import BestProductsPage from './pages/BestProductsPage'
 import LoginPage from './pages/LoginPage'
@@ -36,6 +37,7 @@ import ShippingPolicyPage from './pages/ShippingPolicyPage'
 export default function App() {
   return (
     <>
+      <InstallAppBar />
       <Header />
       <CategoryNav />
       <main>
