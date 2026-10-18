@@ -2,7 +2,8 @@
 // 주문·결제·재고는 늘 새것이어야 하므로 데이터(Supabase·토스 등 다른 주소)는 절대 저장하지 않는다.
 // 저장하는 것: 이름에 해시가 붙어 바뀌지 않는 /assets/ 파일과 아이콘뿐.
 // 화면(페이지)은 항상 인터넷에서 새로 받고, 인터넷이 끊겼을 때만 마지막에 받은 첫 화면을 보여 준다.
-const CACHE = 'farmday-v1'
+// 아이콘·저장 방식을 바꾸면 숫자를 올린다 — 옛 저장분이 지워진다 (v2: 아이콘 시안 A로 교체)
+const CACHE = 'farmday-v2'
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['/', '/icons/icon-192.png'])))
