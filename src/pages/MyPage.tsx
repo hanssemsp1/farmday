@@ -142,10 +142,10 @@ export default function MyPage() {
             <span>게시판</span>
             <Icon name="chevron-right" className="icon-sm" />
           </Link>
-          <a href="#" className="support-link">
-            <span>1:1 문의</span>
+          <Link to="/inquiry" className="support-link">
+            <span>1:1 문의 (교환 · 반품)</span>
             <Icon name="chevron-right" className="icon-sm" />
-          </a>
+          </Link>
           <Link to="/notice" className="support-link">
             <span>공지사항</span>
             <Icon name="chevron-right" className="icon-sm" />

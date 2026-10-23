@@ -93,6 +93,9 @@ export default function Header() {
               <Link to="/admin/orders" className="btn btn-sm btn-outline">
                 주문 발주
               </Link>
+              <Link to="/admin/inquiries" className="btn btn-sm btn-outline">
+                1:1 문의
+              </Link>
               <Link to="/admin/diary" className="btn btn-sm btn-outline">
                 다이어리
               </Link>

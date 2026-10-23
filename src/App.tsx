@@ -25,6 +25,8 @@ import AdminSettingsPage from './pages/AdminSettingsPage'
 import AdminPlanningPage from './pages/AdminPlanningPage'
 import AdminDiaryPage from './pages/AdminDiaryPage'
 import AdminOrdersPage from './pages/AdminOrdersPage'
+import AdminInquiriesPage from './pages/AdminInquiriesPage'
+import InquiryPage from './pages/InquiryPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import FindIdPage from './pages/FindIdPage'
@@ -63,6 +65,8 @@ export default function App() {
           <Route path="/admin/planning" element={<AdminPlanningPage />} />
           <Route path="/admin/diary" element={<AdminDiaryPage />} />
           <Route path="/admin/orders" element={<AdminOrdersPage />} />
+          <Route path="/admin/inquiries" element={<AdminInquiriesPage />} />
+          <Route path="/inquiry" element={<InquiryPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/find-id" element={<FindIdPage />} />
